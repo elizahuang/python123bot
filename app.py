@@ -11,7 +11,7 @@ app=Flask(__name__)
 #Channel Access Token
 line_bot_api=LineBotApi('wFIIYURbi0u7+WZTgmX+lmzyyiVicagWMOkLNBliRW+Hb9ycfdXx0jg7fEydw32TdFF74qprleXwNEX/w7HhMl7QbkMV3vEGeHrY49kRs9okUW9gz14HQTaOUqku5vBit2DYWxzgZpuQ6FyxCg8erAdB04t89/1O/w1cDnyilFU=')
 #Channel Secret
-handler=LineBotApi('3194fbf9c0e027b0aec2ac2abb390f29')
+handler=WebhookHandler('3194fbf9c0e027b0aec2ac2abb390f29')
 
 #監聽來自 /callback的Post request
 @app.route("/callback", methods=['POST'])
