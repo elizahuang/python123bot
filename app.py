@@ -17,7 +17,7 @@ handler=WebhookHandler('3194fbf9c0e027b0aec2ac2abb390f29')
 @app.route("/callback", methods=['POST'])
 def callback():
     #get X-Line-Signature header value
-    signature-request.headers['X-Line-Signature']
+    signature=request.headers['X-Line-Signature']
     #get request body as text
     body=request.get_data(as_text=True)
     app.logger.info("Request body: "+body)
