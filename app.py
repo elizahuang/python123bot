@@ -6,7 +6,7 @@ from linebot.exceptions import(InvalidSignatureError)
 
 from linebot.models import * 
 
-import configparser
+import configparser, json
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -25,8 +25,8 @@ def callback():
     #get request body as text
     body=request.get_data(as_text=True)
     app.logger.info("Request body: "+body)
-    
-    print(body)
+
+    #print(body)
     #handle webhook body
     try: 
         handler.handle(body, signature)
@@ -37,8 +37,13 @@ def callback():
 #處理訊息
 @handler.add(MessageEvent ,message=TextMessage)
 def echo(event):
-    message=TextSendMessage(text=event.message.text)
-    line_bot_api.reply_message(event.reply_token, message)
+    if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
+        pretty_note = '♫♪♬'
+        #texttype=type(event.message.text)
+        print(type(event.message.text))
+        pretty_note+=(event.message.text)
+        message=TextSendMessage(text=pretty_note)
+        line_bot_api.reply_message(event.reply_token, message)
 
 import os 
 if __name__=="__main__":
