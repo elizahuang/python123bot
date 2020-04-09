@@ -6,15 +6,19 @@ from linebot.exceptions import(InvalidSignatureError)
 
 from linebot.models import * 
 
+import configparser
+
 app=Flask(__name__)
+config=configparser.ConfigParser()
+config.read('config.ini')
 
 #Channel Access Token
-line_bot_api=LineBotApi('wFIIYURbi0u7+WZTgmX+lmzyyiVicagWMOkLNBliRW+Hb9ycfdXx0jg7fEydw32TdFF74qprleXwNEX/w7HhMl7QbkMV3vEGeHrY49kRs9okUW9gz14HQTaOUqku5vBit2DYWxzgZpuQ6FyxCg8erAdB04t89/1O/w1cDnyilFU=')
+line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
 #Channel Secret
-handler=WebhookHandler('3194fbf9c0e027b0aec2ac2abb390f29')
+handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
-#監聽來自 /callback的Post request
-@app.route("/", methods=['POST'])
+#監聽來自 /callback的Post request  #伺服器設置來接收line發送過來資訊的位置
+@app.route("/callback", methods=['POST'])
 def callback():
     #get X-Line-Signature header value
     signature=request.headers['X-Line-Signature']
@@ -30,7 +34,7 @@ def callback():
 
 #處理訊息
 @handler.add(MessageEvent ,message=TextMessage)
-def handle_message(event):
+def echo(event):
     message=TextSendMessage(text=event.message.text)
     line_bot_api.reply_message(event.reply_token, message)
 
