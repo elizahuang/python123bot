@@ -1,11 +1,7 @@
 from flask import Flask, request, abort
-
 from linebot import(LineBotApi, WebhookHandler)
-
 from linebot.exceptions import(InvalidSignatureError)
-
 from linebot.models import * 
-
 import configparser, json
 
 app=Flask(__name__)
@@ -17,6 +13,7 @@ line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
 #Channel Secret
 handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
+
 #監聽來自 /callback的Post request  #伺服器設置來接收line發送過來資訊的位置
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -26,8 +23,9 @@ def callback():
     body=request.get_data(as_text=True)
     app.logger.info("Request body: "+body)
 
-    #print(body)
+    print(body)
     #handle webhook body
+    #line_bot_api.broadcast(TextSendMessage(text='broadcast_test'),True)
     try: 
         handler.handle(body, signature)
     except InvalidSignatureError:
@@ -35,6 +33,11 @@ def callback():
     return 'OK'
 
 #處理訊息
+@handler.add(FollowEvent)
+def follow(event):
+    #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
+    line_bot_api.reply_message(event.reply_token,StickerSendMessage(package_id=1, sticker_id=2));
+
 @handler.add(MessageEvent ,message=TextMessage)
 def echo(event):
     if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
@@ -44,6 +47,7 @@ def echo(event):
         pretty_note+=(event.message.text)
         message=TextSendMessage(text=pretty_note)
         line_bot_api.reply_message(event.reply_token, message)
+        line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))
 
 import os 
 if __name__=="__main__":
