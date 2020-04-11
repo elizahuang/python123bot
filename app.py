@@ -2,11 +2,12 @@ from flask import Flask, request, abort
 from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import * 
-import configparser, json
+import configparser, json, codecs, emoji
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
-config.read('config.ini')
+config.readfp(codecs.open("config.ini", "r", "utf8"))
+#config.read('config.ini')
 
 #Channel Access Token
 line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
@@ -22,8 +23,10 @@ def callback():
     #get request body as text
     body=request.get_data(as_text=True)
     app.logger.info("Request body: "+body)
-
-    print(body)
+    print(request)
+    print(request.headers)
+    
+    #print(body)
     #handle webhook body
     #line_bot_api.broadcast(TextSendMessage(text='broadcast_test'),True)
     try: 
@@ -36,14 +39,17 @@ def callback():
 @handler.add(FollowEvent)
 def follow(event):
     #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
-    line_bot_api.reply_message(event.reply_token,StickerSendMessage(package_id=1, sticker_id=2));
+    followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')
+    #print(type(config.get('msgWords','follow_msg')))
+    line_bot_api.reply_message(event.reply_token,TextSendMessage(followMsg));
+    #StickerSendMessage(package_id=1, sticker_id=2)
 
 @handler.add(MessageEvent ,message=TextMessage)
 def echo(event):
     if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
         pretty_note = '♫♪♬'
         #texttype=type(event.message.text)
-        print(type(event.message.text))
+        #print(type(event.message.text))
         pretty_note+=(event.message.text)
         message=TextSendMessage(text=pretty_note)
         line_bot_api.reply_message(event.reply_token, message)
