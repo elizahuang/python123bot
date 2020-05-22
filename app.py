@@ -21,12 +21,12 @@ def returnGreetingPic():
     greetingPicPath=fileDir+"/greetingPic.png"
     return send_file(greetingPicPath, mimetype='image/png')   
 
-@app.route('/getsysimg/<picPath>',methods=['GET','POST'])#
-def returnGreetingPic():
+@app.route('/<get_sys_img>/<pic_path>',methods=['GET','POST'])#
+def returnPic():
     fileDir = os.path.dirname(os.path.realpath('__file__'))
-    targetPath=config.get('paths',picPath)
+    targetPath=fileDir+config.get('paths',get_sys_img)+config.get('paths',pic_path)
     #greetingPicPath=fileDir+"/greetingPic.png"
-    greetingPicPath=fileDir+targetPath
+    #greetingPicPath=fileDir+targetPath
     return send_file(greetingPicPath, mimetype='image/png')   
 
 '''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
