@@ -22,7 +22,7 @@ handler=WebhookHandler(config.get('line-bot','channel_secret'))
 @app.route("/greetingPic",methods=['GET','POST'])#
 def returnGreetingPic():
     fileDir = os.path.dirname(os.path.realpath('__file__'))
-    greetingPicPath=fileDir+"\greetingPic.png"
+    greetingPicPath=fileDir+"/greetingPic.png"
     #img=imageio.imread(greetingPicPath)
     #print(type(requests.get("https://i.ibb.co/mBgCFKp/greeting-Pic.jpg").content))
     return send_file(greetingPicPath, mimetype='image/png')
@@ -76,7 +76,7 @@ def follow(event):
     pharmacistName="王藥師"
     
     #greetImgUrl=config.get('urls','greet_img_url')
-    greetImgUrl=config.get('urls','server_path')+config.get('urls','greeting_pic_url')
+    greetImgUrl=config.get('urls','heroku_server_path')+config.get('urls','greeting_pic_url')
     #print(requests.get(url=greetImgUrl).content)
 
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
