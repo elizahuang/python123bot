@@ -28,7 +28,7 @@ def returnPic(pic_path):
     #targetPath=fileDir+config.get('paths','get_sys_img')+config.get('paths',pic_path)
     #greetingPicPath=fileDir+"/greetingPic.png"
     #greetingPicPath=fileDir+targetPath
-    return send_file(greetingPicPath, mimetype='image/png')   
+    return send_file(targetPath, mimetype='image/png')   
 
 '''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
 @app.route("/callback", methods=['POST'])
