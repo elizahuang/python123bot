@@ -6,8 +6,8 @@ import configparser, json, codecs, emoji
 import flexMsgTest
 import requests
 import os 
-from PIL import Image as PImage
-import imageio
+#from PIL import Image as PImage
+#import imageio
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -23,10 +23,10 @@ handler=WebhookHandler(config.get('line-bot','channel_secret'))
 def returnGreetingPic():
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     greetingPicPath=fileDir+"/greetingPic.png"
-    return greetingPicPath
+    #return greetingPicPath
     #img=imageio.imread(greetingPicPath)
     #print(type(requests.get("https://i.ibb.co/mBgCFKp/greeting-Pic.jpg").content))
-    #return send_file(greetingPicPath, mimetype='image/png')
+    return send_file(greetingPicPath, mimetype='image/png')
 
     '''
     fileDir = os.path.dirname(os.path.realpath('__file__'))
