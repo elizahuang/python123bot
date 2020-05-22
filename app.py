@@ -21,7 +21,7 @@ def returnGreetingPic():
     greetingPicPath=fileDir+"/greetingPic.png"
     return send_file(greetingPicPath, mimetype='image/png')   
 
-@app.route('/<get_sys_img>/<pic_path>',methods=['GET','POST'])#
+@app.route('/get_sys_img/<pic_path>',methods=['GET','POST'])#
 def returnPic():
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     targetPath=fileDir+config.get('paths',get_sys_img)+config.get('paths',pic_path)
@@ -70,7 +70,7 @@ def follow(event):
     pharmacistName="王藥師"
     
     #greetImgUrl=config.get('urls','heroku_server_path')+config.get('urls','greeting_pic_url')
-    greetImgUrl=config.get('urls','heroku_server_path')+config.get('paths','get_sys_img')+config.get('paths','greeting_pic_url')
+    greetImgUrl=config.get('urls','heroku_server_path')+"get_sys_img/"+config.get('paths','greeting_pic_url')
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
     
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(
