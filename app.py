@@ -70,7 +70,7 @@ def follow(event):
     pharmacistName="王藥師"
     
     #greetImgUrl=config.get('urls','heroku_server_path')+config.get('urls','greeting_pic_url')
-    greetImgUrl=config.get('urls','heroku_server_path')+"get_sys_img/"+config.get('paths','greeting_pic_url')
+    greetImgUrl=config.get('urls','heroku_server_path')+"/get_sys_img"+config.get('paths','greeting_pic_url')
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
     
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(
