@@ -15,19 +15,10 @@ line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
 '''Channel Secret'''
 handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
-@app.route("/greetingPic",methods=['GET','POST'])#
-def returnGreetingPic():
-    fileDir = os.path.dirname(os.path.realpath('__file__'))
-    greetingPicPath=fileDir+"/greetingPic.png"
-    return send_file(greetingPicPath, mimetype='image/png')   
-
 @app.route('/sys_img/<pic_path>',methods=['GET','POST'])#
 def returnPic(pic_path):
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     targetPath=fileDir+"/sys_img"+"/"+pic_path
-    #targetPath=fileDir+config.get('paths','get_sys_img')+config.get('paths',pic_path)
-    #greetingPicPath=fileDir+"/greetingPic.png"
-    #greetingPicPath=fileDir+targetPath
     return send_file(targetPath, mimetype='image/png')   
 
 '''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
@@ -70,8 +61,7 @@ def follow(event):
     pharmacyName="亮亮藥局"
     pharmacistName="王藥師"
     
-    #greetImgUrl=config.get('urls','heroku_server_path')+config.get('urls','greeting_pic_url')
-    greetImgUrl=config.get('urls','heroku_server_path')+"/sys_img"+config.get('paths','greeting_pic_url')
+    greetImgUrl=config.get('server_urls','heroku_server_path')+"/sys_img"+config.get('paths','greeting_pic_url')
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
     
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(
