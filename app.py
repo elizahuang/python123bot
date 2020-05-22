@@ -22,7 +22,7 @@ def returnGreetingPic():
     return send_file(greetingPicPath, mimetype='image/png')   
 
 @app.route('/get_sys_img/<pic_path>',methods=['GET','POST'])#
-def returnPic():
+def returnPic(pic_path):
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     targetPath=fileDir+config.get('paths',get_sys_img)+config.get('paths',pic_path)
     #greetingPicPath=fileDir+"/greetingPic.png"
