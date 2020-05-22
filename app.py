@@ -5,7 +5,8 @@ from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage,
 import configparser, json, codecs, emoji
 import flexMsgTest
 import requests
-import os
+import os 
+from PIL import Image as PImage
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -21,8 +22,10 @@ handler=WebhookHandler(config.get('line-bot','channel_secret'))
 def returnGreetingPic():
     #print(dir(os))
     fileDir = os.path.dirname(os.path.realpath('__file__'))
-    greetingPic = os.path.join(fileDir, 'greetingPic.png')
-    return greetingPic
+    greetingPicPath = os.path.join(fileDir, 'greetingPic.png')
+    img=PImage.open(greetingPicPath)
+    return img
+    #return greetingPicPath
 
 #監聽來自 /callback的Post request  #伺服器設置來接收line發送過來資訊的位置
 @app.route("/callback", methods=['POST'])
@@ -62,6 +65,7 @@ def follow(event):
     
     #greetImgUrl=config.get('urls','greet_img_url')
     greetImgUrl=config.get('urls','server_path')+config.get('urls','greeting_pic_url')
+    print(requests.get(url=greetImgUrl).content)
 
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(
@@ -134,7 +138,6 @@ def echo(event):
                 line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))
 
             
-import os 
 if __name__=="__main__":
     #app.debug=True
     port=int(os.environ.get("PORT", 5000))
