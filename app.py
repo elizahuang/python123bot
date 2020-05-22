@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, send_file
 from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage)
@@ -7,6 +7,7 @@ import flexMsgTest
 import requests
 import os 
 from PIL import Image as PImage
+import imageio
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -18,14 +19,25 @@ line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
 #Channel Secret
 handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
-@app.route("/greetingPic")
+@app.route("/greetingPic",methods=['GET','POST'])#
 def returnGreetingPic():
-    #print(dir(os))
+    fileDir = os.path.dirname(os.path.realpath('__file__'))
+    greetingPicPath=fileDir+"\greetingPic.png"
+    #img=imageio.imread(greetingPicPath)
+    #print(type(requests.get("https://i.ibb.co/mBgCFKp/greeting-Pic.jpg").content))
+    return send_file(greetingPicPath, mimetype='image/png')
+
+    '''
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     greetingPicPath = os.path.join(fileDir, 'greetingPic.png')
     img=PImage.open(greetingPicPath)
-    return img
-    #return greetingPicPath
+    return greetingPicPath
+    '''
+#@app.route("/getSysImg/<imgInfo>/<userId>")
+#def sendImgToBot():
+#    fileDir = os.path.dirname(os.path.realpath('__file__'))
+#    if imgInfo=="greetingPic":
+
 
 #監聽來自 /callback的Post request  #伺服器設置來接收line發送過來資訊的位置
 @app.route("/callback", methods=['POST'])
@@ -65,7 +77,7 @@ def follow(event):
     
     #greetImgUrl=config.get('urls','greet_img_url')
     greetImgUrl=config.get('urls','server_path')+config.get('urls','greeting_pic_url')
-    print(requests.get(url=greetImgUrl).content)
+    #print(requests.get(url=greetImgUrl).content)
 
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(
