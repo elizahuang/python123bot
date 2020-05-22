@@ -2,71 +2,64 @@ from flask import Flask, request, abort, send_file
 from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage)
-import configparser, json, codecs, emoji
-import flexMsgTest
-import requests
-import os 
-#from PIL import Image as PImage
-#import imageio
+import configparser, json, codecs, emoji, requests, os
+import flexMsgTest, setRichMenu
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 #config.read_file('config.ini')
 
-#Channel Access Token
+'''Channel Access Token'''
 line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
-#Channel Secret
+'''Channel Secret'''
 handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
 @app.route("/greetingPic",methods=['GET','POST'])#
 def returnGreetingPic():
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     greetingPicPath=fileDir+"/greetingPic.png"
-    #return greetingPicPath
-    #img=imageio.imread(greetingPicPath)
-    #print(type(requests.get("https://i.ibb.co/mBgCFKp/greeting-Pic.jpg").content))
-    return send_file(greetingPicPath, mimetype='image/png')
+    return send_file(greetingPicPath, mimetype='image/png')   
 
-    '''
+@app.route('/getsysimg/<picPath>',methods=['GET','POST'])#
+def returnGreetingPic():
     fileDir = os.path.dirname(os.path.realpath('__file__'))
-    greetingPicPath = os.path.join(fileDir, 'greetingPic.png')
-    img=PImage.open(greetingPicPath)
-    return greetingPicPath
-    '''
-#@app.route("/getSysImg/<imgInfo>/<userId>")
-#def sendImgToBot():
-#    fileDir = os.path.dirname(os.path.realpath('__file__'))
-#    if imgInfo=="greetingPic":
+    targetPath=config.get('paths',picPath)
+    #greetingPicPath=fileDir+"/greetingPic.png"
+    greetingPicPath=fileDir+targetPath
+    return send_file(greetingPicPath, mimetype='image/png')   
 
-
-#監聽來自 /callback的Post request  #伺服器設置來接收line發送過來資訊的位置
+'''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
 @app.route("/callback", methods=['POST'])
 def callback():
-    #get X-Line-Signature header value
+    '''get X-Line-Signature header value'''
     signature=request.headers['X-Line-Signature']
-    #get request body as text
+    '''get request body as text'''
     body=request.get_data(as_text=True)
     app.logger.info("Request body: "+body)
     #print(request)
     #print(request.headers)
     #print(body)
-    #handle webhook body
     #line_bot_api.broadcast(TextSendMessage(text='broadcast_test'),True)
+    '''handle webhook body'''
     try: 
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
     return 'OK'
 
-#處理訊息
+'''處理訊息'''
 @handler.add(FollowEvent)
 def follow(event):
-    #savePatientInfo()  firstname, lastname, gender , card number, id number, chatbot number
+    '''savePatientInfo()  firstname, lastname, gender , card number, id number, chatbot number'''
+   
     userId=event.source.user_id ## 紀錄userId到DB
     print(userId)
+
+    '''
     #getPatientInfo();  firstname, lastname, gender, chatbot number
-    #getPharmInfo();  Pharmacy name, Pharmacist name
+    #getPharmInfo();  Pharmacy name, Pharmacist name'''
+    
     lastName="汪";
     gender="male"
     if gender=="male":
@@ -76,27 +69,23 @@ def follow(event):
     pharmacyName="亮亮藥局"
     pharmacistName="王藥師"
     
-    #greetImgUrl=config.get('urls','greet_img_url')
-    greetImgUrl=config.get('urls','heroku_server_path')+config.get('urls','greeting_pic_url')
-    #print(requests.get(url=greetImgUrl).content)
-
+    #greetImgUrl=config.get('urls','heroku_server_path')+config.get('urls','greeting_pic_url')
+    greetImgUrl=config.get('urls','heroku_server_path')+config.get('paths','get_sys_img')+config.get('paths','greeting_pic_url')
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
+    
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(
         type="image",
         original_content_url=greetImgUrl,
         preview_image_url=greetImgUrl
     ))
     line_bot_api.push_message(event.source.user_id,TextSendMessage(followMsg))
-    line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc')))
+    line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc')))    
     
-    """
     #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
-    followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')
+    #followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')
     #print(type(config.get('msgWords','follow_msg')))
-    line_bot_api.reply_message(event.reply_token,TextSendMessage(followMsg));
-    """
-    #StickerSendMessage(package_id=1, sticker_id=2)
-    
+    #line_bot_api.reply_message(event.reply_token,TextSendMessage(followMsg));
+    #StickerSendMessage(package_id=1, sticker_id=2)    
 
 @handler.add(MessageEvent ,message=[TextMessage,ImageMessage])#||ImageMessage
 def echo(event):
@@ -140,11 +129,11 @@ def echo(event):
                 line_bot_api.reply_message(event.reply_token,replyMsg)    
             else:    
                 pretty_note = '♫♪♬'
-                '''
-                print(event.message)
-                texttype=type(event.message.text)
-                print(type(event.message.text))
-                '''
+                
+                #print(event.message)
+                #texttype=type(event.message.text)
+                #print(type(event.message.text))
+                
                 pretty_note+=(event.message.text)
                 replyMsg=TextSendMessage(text=pretty_note)
                 line_bot_api.reply_message(event.reply_token, replyMsg)
