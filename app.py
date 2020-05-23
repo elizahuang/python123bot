@@ -18,8 +18,8 @@ handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
 @app.route('/sys_img/<pic_path>',methods=['GET','POST'])#
 def returnPic(pic_path):
-    fileDir = os.path.dirname(os.path.realpath('__file__'))
-    targetPath=fileDir+"/sys_img"+pic_path
+    fileDir = os.path.join('/sys_img',os.path.dirname(os.path.realpath('__file__')))
+    targetPath=os.path.join(fileDir,pic_path)
     return send_file(targetPath, mimetype='image/png')   
 
 '''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
@@ -62,7 +62,7 @@ def follow(event):
     pharmacyName="亮亮藥局"
     pharmacistName="王藥師"
     
-    greetImgUrl=config.get('server_urls','heroku_server_path')+config.get('paths','greeting_pic_url')
+    greetImgUrl=os.path.join(config.get('server_urls','heroku_server_path'),config.get('paths','greeting_pic_url'))
     followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
     
     line_bot_api.reply_message(event.reply_token,ImageSendMessage(

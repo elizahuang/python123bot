@@ -68,7 +68,7 @@ def createRichMenu():
     menuId=requests.post(url, headers=headers, json=body).json()['richMenuId']
     #f.close()    
     return menuId
-
+'''
 def uploadRichMenuImg():
     print(menuId)
     pwd=config.get('line-bot','channel_access_token')
@@ -85,7 +85,7 @@ def uploadRichMenuImg():
     #files = {'media': open(fileDir+'\\sys_img\\richMenuPic.png', 'rb')}
     response=requests.post(url, headers=headers,files=files)
     print(response)
-
+'''
 def linkMenuToAllUser():
     print(menuId)
     pwd=config.get('line-bot','channel_access_token')
@@ -99,5 +99,5 @@ def linkMenuToAllUser():
 
 
 menuId=createRichMenu()
-uploadRichMenuImg()
+#uploadRichMenuImg()
 linkMenuToAllUser()
