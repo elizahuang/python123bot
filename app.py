@@ -20,7 +20,7 @@ handler=WebhookHandler(config.get('line-bot','channel_secret'))
 def returnPic(pic_path):
     fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'/sys_img')
     targetPath=os.path.join(fileDir,pic_path)
-    return targetPath
+    return fileDir
     #return send_file(targetPath, mimetype='image/png')   
 
 '''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
