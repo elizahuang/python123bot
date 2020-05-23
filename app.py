@@ -1,9 +1,9 @@
 from flask import Flask, request, abort, send_file
 from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
-from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage)
+from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
 import configparser, json, codecs, emoji, requests, os
-import flexMsgTest, setRichMenu
+import flexMsgTest, pharInfoContent,mediToGrabContent
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -118,20 +118,27 @@ def echo(event):
             if event.message.text=="撥打電話":
                 '''call function to get pharmacy number'''
                 pharmNumber='\n0900-000-000'
-                replyMsg=config.get('msg_contents','dial_instruc')+pharmNumber 
-                linebot.reply_message(event.reply_token,replyMsg)
+                replyMsg=config.get('msg_contents','dial_instruc') 
+                replyMsg+=pharmNumber 
+                line_bot_api.reply_message(event.reply_token,TextSendMessage(replyMsg))
             elif event.message.text=="用藥問題":
                 '''call function to get pharmacy number'''
                 pharmNumber='\n0900-000-000'
-                replyMsg=config.get('msg_contents','mediQuestion_instru')+pharmNumber 
-                linebot.reply_message(event.reply_token,replyMsg)
+                replyMsg=config.get('msg_contents','mediQuestion_instruc')+pharmNumber 
+                line_bot_api.reply_message(event.reply_token,TextSendMessage(replyMsg))
             
             elif event.message.text=="藥局資訊":
-                content=flexMsgTest.returnCarousel()
+                content=pharInfoContent.returnPharmInfo()
                 replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
                 line_bot_api.reply_message(event.reply_token,replyMsg)
-            #elif event.message.text=="領藥日查詢":
-
+            elif event.message.text=="領藥日查詢":
+                content=mediToGrabContent.replyDateSearch();
+                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
+                line_bot_api.reply_message(event.reply_token,replyMsg)
+            elif event.message.text=="立即前往":
+                '''get fb url'''
+                fb_url='https://www.facebook.com/'
+                requests.get(fb_url).content
             else:    
                 pretty_note = '♫♪♬'
                 
