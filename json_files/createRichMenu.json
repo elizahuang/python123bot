@@ -1,0 +1,50 @@
+{
+    "size": {
+    "width": 1257,
+    "height": 424
+    },
+    "selected": true,
+    "name": "Nice richmenu",
+    "chatBarText": "點此開啟服務選單",
+    "areas":[
+        {
+            "bounds":{
+                "x":0,
+                "y":0,
+                "width":419,
+                "height":424
+            },
+            "action":{
+                "type":"message",
+                "label":"pharmacyInfo",
+                "text":"藥局資訊"
+            }
+        },
+        {
+            "bounds":{
+                "x":419,
+                "y":0,
+                "width":419,
+                "height":424
+            },
+            "action":{
+                "type":"message",
+                "label":"dateToPickDrug",
+                "text":"領藥日查詢"
+            }
+        },
+        {
+            "bounds":{
+                "x":838,
+                "y":0,
+                "width":419,
+                "height":424
+            },
+            "action":{
+                "type":"message",
+                "label":"askAboutDrug",
+                "text":"用藥問題"
+            }
+        }            
+    ]
+}

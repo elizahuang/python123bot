@@ -15,6 +15,7 @@ line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
 '''Channel Secret'''
 handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
+
 @app.route('/sys_img/<pic_path>',methods=['GET','POST'])#
 def returnPic(pic_path):
     fileDir = os.path.dirname(os.path.realpath('__file__'))
@@ -110,6 +111,34 @@ def echo(event):
                         fd.write(message_content)
             '''                
         else:
+            if event.message.text=="撥打電話":
+                '''call function to get pharmacy number'''
+                pharmNumber='\n0900-000-000'
+                replyMsg=config.get('msg_contents','dial_instruc')+pharmNumber 
+                linebot.reply_message(event.reply_token,replyMsg)
+            elif event.message.text=="用藥問題":
+                '''call function to get pharmacy number'''
+                pharmNumber='\n0900-000-000'
+                replyMsg=config.get('msg_contents','mediQuestion_instru')+pharmNumber 
+                linebot.reply_message(event.reply_token,replyMsg)
+            
+            elif event.message.text=="藥局資訊":
+                content=flexMsgTest.returnCarousel()
+                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
+                line_bot_api.reply_message(event.reply_token,replyMsg)
+            #elif event.message.text=="領藥日查詢":
+
+            else:    
+                pretty_note = '♫♪♬'
+                
+                #print(event.message)
+                #texttype=type(event.message.text)
+                #print(type(event.message.text))
+                
+                pretty_note+=(event.message.text)
+                replyMsg=TextSendMessage(text='您輸入了： '+pretty_note)
+                line_bot_api.reply_message(event.reply_token, replyMsg) 
+            '''
             if event.message.text=="flexBubble":
                 content=flexMsgTest.returnBubble()
                 replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
@@ -128,7 +157,7 @@ def echo(event):
                 pretty_note+=(event.message.text)
                 replyMsg=TextSendMessage(text=pretty_note)
                 line_bot_api.reply_message(event.reply_token, replyMsg)
-                line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))
+                line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))'''
 
             
 if __name__=="__main__":
