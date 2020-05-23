@@ -18,7 +18,7 @@ handler=WebhookHandler(config.get('line-bot','channel_secret'))
 
 @app.route('/sys_img/<pic_path>',methods=['GET','POST'])#
 def returnPic(pic_path):
-    fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'/sys_img')
+    fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'../sys_img')
     targetPath=os.path.join(fileDir,pic_path)
     return os.path.dirname(os.path.realpath('__file__'))
     #return send_file(targetPath, mimetype='image/png')
