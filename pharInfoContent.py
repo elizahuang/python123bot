@@ -131,9 +131,9 @@ def returnPharmInfo():
           }
         ],
         "action": {
-          "type": "message",
+          "type": "uri",
           "label": "action",
-          "text": "立即前往"
+          "uri": "https://www.facebook.com"
         }
       },
       "styles": {

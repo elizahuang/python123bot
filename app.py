@@ -141,11 +141,9 @@ def echo(event):
                 requests.get(fb_url).content
             else:    
                 pretty_note = '♫♪♬'
-                
                 #print(event.message)
                 #texttype=type(event.message.text)
                 #print(type(event.message.text))
-                
                 pretty_note+=(event.message.text)
                 replyMsg=TextSendMessage(text='您輸入了： '+pretty_note)
                 line_bot_api.reply_message(event.reply_token, replyMsg) 
@@ -170,7 +168,6 @@ def echo(event):
                 line_bot_api.reply_message(event.reply_token, replyMsg)
                 line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))'''
 
-            
 if __name__=="__main__":
     #app.debug=True
     port=int(os.environ.get("PORT", 5000))

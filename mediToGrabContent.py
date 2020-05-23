@@ -50,7 +50,9 @@ def replyDateSearch():
     if gender=='male':
         name+='先生: \n'
     else: name+='女士: \n'
-    msg=name+',您的下次的慢箋領藥時間:\n'+dateToGrab+"，請攜帶健保卡前來藥局領取慢箋藥品！屆時也會再通知您喔！"
+    
+    ###put the string in config, replace character when read xxxx??
+    msg=name+'您的下次的慢箋領藥時間:\n'+dateToGrab+"，請攜帶健保卡前來藥局領取慢箋藥品！屆時也會再通知您喔！"  
     '''
     content is a dict, call values through the keys is the dict.
     the 2 contents are list, should be called through integer indices(index). 
