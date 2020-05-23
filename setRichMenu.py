@@ -82,7 +82,7 @@ def uploadRichMenuImg():
     
     #with open(fileDir+'\\sys_img\\richMenuPic.png', 'rb')as rd:
     #            data=rd.read()
-    files = {'media': open(fileDir+'\\sys_img\\richMenuPic.png', 'rb')}
+    #files = {'media': open(fileDir+'\\sys_img\\richMenuPic.png', 'rb')}
     response=requests.post(url, headers=headers,files=files)
     print(response)
 
