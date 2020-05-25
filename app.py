@@ -3,7 +3,7 @@ from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
 import configparser, json, codecs, emoji, requests, os
-import flexMsgTest, pharInfoContent,mediToGrabContent
+import flexMsgTest, pharInfoContent,mediToGrabContent, getUserLineInfo
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -75,7 +75,9 @@ def follow(event):
         preview_image_url=greetImgUrl
     ))
     line_bot_api.push_message(event.source.user_id,TextSendMessage(followMsg))
-    line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc')))    
+    line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc'))) 
+    getUserLineInfo.get_save_userInfo(event.source.user_id);
+    
     
     #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
     #followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')
