@@ -5,6 +5,5 @@ test line-bot use
 > 各種固定的值
 
 * [server_urls]
-local_server_path=**改成ngrok https的網址**
-heroku_server_path=https://python123bot.herokuapp.com/
+local_server_path=**改成ngrok https的網址**, heroku_server_path=https://python123bot.herokuapp.com/
 
