@@ -3,7 +3,7 @@ from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
 import configparser, json, codecs, emoji, requests, os
-import flexMsgTest, pharInfoContent,mediToGrabContent, getUserLineInfo
+import flexMsgTest, pharInfoContent,mediToGrabContent, getUserLineInfo, sendLineAccount
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
@@ -134,13 +134,17 @@ def echo(event):
                 replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
                 line_bot_api.reply_message(event.reply_token,replyMsg)
             elif event.message.text=="領藥日查詢":
-                content=mediToGrabContent.replyDateSearch();
+                content=mediToGrabContent.replyDateSearch()
                 replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
                 line_bot_api.reply_message(event.reply_token,replyMsg)
             elif event.message.text=="立即前往":
                 '''get fb url'''
                 fb_url='https://www.facebook.com/'
                 requests.get(fb_url).content
+            elif event.message.text=="藥局官方帳號":
+                content=sendLineAccount.sendLineAccount()
+                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
+                line_bot_api.reply_message(event.reply_token,replyMsg)
             else:    
                 pretty_note = '♫♪♬'
                 #print(event.message)
