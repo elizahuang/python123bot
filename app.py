@@ -4,16 +4,33 @@ from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
 import configparser, json, codecs, emoji, requests, os
 import flexMsgTest, pharInfoContent,mediToGrabContent, getUserLineInfo, sendLineAccount
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
+from pathlib import Path
 
 app=Flask(__name__)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 #config.read_file('config.ini')
 
+
 '''Channel Access Token'''
-line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
+#line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
 '''Channel Secret'''
-handler=WebhookHandler(config.get('line-bot','channel_secret'))
+#handler=WebhookHandler(config.get('line-bot','channel_secret'))
+
+is_heroku=os.environ.get("IS_HEROKU",None)
+if is_heroku:
+    channel_access_token=os.environ.get("CHANNEL_ACCESS_TOKEN",None)
+    channel_secret=os.environ.get("CHANNEL_SECRET",None)
+else:
+    env_path = Path('.') / '.env'
+    load_dotenv(dotenv_path=env_path)
+    channel_access_token=os.getenv("CHANNEL_ACCESS_TOKEN",None)
+    channel_secret=os.getenv("CHANNEL_SECRET",None)
+    
+line_bot_api=LineBotApi(channel_access_token)
+handler=WebhookHandler(channel_secret)
 
 
 @app.route('/sys_img/<pic_path>',methods=['GET','POST'])#
@@ -48,7 +65,7 @@ def callback():
 '''處理訊息'''
 @handler.add(FollowEvent)
 def follow(event):
-    '''savePatientInfo()  firstname, lastname, gender , card number, id number, chatbot number'''
+    '''savePatientInfo()  firstname, lastname, card number, id number, chatbot number'''
    
     userId=event.source.user_id ## 紀錄userId到DB
     print(userId)
@@ -76,7 +93,7 @@ def follow(event):
     ))
     line_bot_api.push_message(event.source.user_id,TextSendMessage(followMsg))
     line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc'))) 
-    getUserLineInfo.get_save_userInfo(event.source.user_id);
+    getUserLineInfo.get_save_userInfo(event.source.user_id,channel_access_token);
     
     
     #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
@@ -94,7 +111,7 @@ def echo(event):
         #print(event.message.type)
         if event.message.type=="image":
             url='https://api-data.line.me/v2/bot/message/{imageMessageId}/content'.format(imageMessageId=event.message.id)
-            headers = {'Authorization' : 'Bearer {botToken}'.format(botToken=config.get('line-bot','channel_access_token'))}
+            headers = {'Authorization' : 'Bearer {botToken}'.format(botToken=channel_access_token)}
             bytesPic=requests.get(url,headers=headers).content
             
             with open("test.png", 'wb+') as fd:

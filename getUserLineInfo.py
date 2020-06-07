@@ -3,9 +3,9 @@ import requests, configparser, codecs, json
 config=configparser.ConfigParser();
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 
-def get_save_userInfo(current_user_id):
+def get_save_userInfo(current_user_id,channel_access_token):
     userInfoUrl='https://api.line.me/v2/bot/profile/{userId}'.format(userId=current_user_id)
-    headers = {'Authorization' : 'Bearer {botToken}'.format(botToken=config.get('line-bot','channel_access_token'))}
+    headers = {'Authorization' : 'Bearer {botToken}'.format(botToken=channel_access_token)}
     userInfo=requests.get(userInfoUrl,headers=headers).content #the result turn out to be a byte object 
     userInfo=userInfo.decode('ASCII') #convert the byte object into string`,the result will be a string dictionary
     userInfo=json.loads(userInfo) #convert the string dictionary into python dict

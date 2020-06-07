@@ -1,4 +1,7 @@
 def sendLineAccount():
+    '''抓藥局名稱、
+    line帳號圖片
+    藥局linebot 帳號代碼'''
     content={
     "type": "bubble",
     "hero": {
