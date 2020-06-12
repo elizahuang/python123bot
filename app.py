@@ -1,24 +1,32 @@
-from flask import Flask, request, abort, send_file
+from flask import Flask, request, abort
 from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
-from linebot.models import (MessageEvent,FollowEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
-import configparser, json, codecs, emoji, requests, os
-import flexMsgTest, pharInfoContent,mediToGrabContent, getUserLineInfo, sendLineAccount
+from linebot.models import (MessageEvent,FollowEvent,PostbackEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
+import configparser, json, codecs, emoji, requests, os,re
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from pathlib import Path
+from urls import urls
+from tests import flexMsgTest
+from linebot_msgs.followMsg import getFollowMsg,askForPersonInfo
+from linebot_msgs.instructionMsg import *
+from linebot_msgs.pharmacyInfoMsg import *
+from linebot_msgs.otherFunctionsMsg import *
+from linebot_msgs.mediQuestionMsg import *
+from linebot_msgs.contactPharmMsg import *
+from linebot_msgs.mediToGrabMsg import *
+from linebot_msgs.mediReminderMsg import mediReminderMsg
+from linebot_msgs.mediReminderMsg import *
+from settings import line_bot_api,handler, headers
+
 
 app=Flask(__name__)
+app.register_blueprint(urls) #urls of the projects were in urls.py
+app.register_blueprint(mediReminderMsg)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
-#config.read_file('config.ini')
 
-
-'''Channel Access Token'''
-#line_bot_api=LineBotApi(config.get('line-bot','channel_access_token'))
-'''Channel Secret'''
-#handler=WebhookHandler(config.get('line-bot','channel_secret'))
-
+'''Initialize channel access token and channel secret
 is_heroku=os.environ.get("IS_HEROKU",None)
 if is_heroku:
     channel_access_token=os.environ.get("CHANNEL_ACCESS_TOKEN",None)
@@ -28,32 +36,24 @@ else:
     load_dotenv(dotenv_path=env_path)
     channel_access_token=os.getenv("CHANNEL_ACCESS_TOKEN",None)
     channel_secret=os.getenv("CHANNEL_SECRET",None)
-    
+
+
 line_bot_api=LineBotApi(channel_access_token)
 handler=WebhookHandler(channel_secret)
+headers = {'Authorization' : 'Bearer {botToken}'.format(botToken=channel_access_token)}'''
 
 
-@app.route('/sys_img/<pic_path>',methods=['GET','POST'])#
-def returnPic(pic_path):
-    fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'sys_img')
-    targetPath=os.path.join(fileDir,pic_path)
-    return send_file(targetPath, mimetype='image/png')
-    #return targetPath
-    #return send_file(targetPath, mimetype='image/png')
-    
-       
-
-'''監聽來自 /callback的Post request  伺服器設置來接收line發送過來資訊的位置'''
+'''response for endpoint of line channel'''
 @app.route("/callback", methods=['POST'])
 def callback():
-    '''get X-Line-Signature header value'''
-    signature=request.headers['X-Line-Signature']
-    '''get request body as text'''
-    body=request.get_data(as_text=True)
+    #get X-Line-Signature header value
+    signature=request.headers['X-Line-Signature']  
+    #get request body as text
+    body=request.get_data(as_text=True)  
     app.logger.info("Request body: "+body)
     #print(request)
     #print(request.headers)
-    #print(body)
+    print(body)
     #line_bot_api.broadcast(TextSendMessage(text='broadcast_test'),True)
     '''handle webhook body'''
     try: 
@@ -62,47 +62,25 @@ def callback():
         abort(400)
     return 'OK'
 
-'''處理訊息'''
+
 @handler.add(FollowEvent)
 def follow(event):
     '''savePatientInfo()  firstname, lastname, card number, id number, chatbot number'''
-   
     userId=event.source.user_id ## 紀錄userId到DB
     print(userId)
-
     '''
     #getPatientInfo();  firstname, lastname, gender, chatbot number
     #getPharmInfo();  Pharmacy name, Pharmacist name'''
-    
-    lastName="汪";
-    gender="male"
-    if gender=="male":
-        title="先生"
-    else: title="小姐"
 
-    pharmacyName="亮亮藥局"
-    pharmacistName="王藥師"
-    
-    greetImgUrl=os.path.join(config.get('server_urls','heroku_server_path'),config.get('paths','greeting_pic_url'))
-    followMsg=lastName+title+"您好，\n我是"+pharmacyName+"的"+pharmacistName+"。\n"+config.get('followMsg','greeting_msg')
-    
-    line_bot_api.reply_message(event.reply_token,ImageSendMessage(
-        type="image",
-        original_content_url=greetImgUrl,
-        preview_image_url=greetImgUrl
-    ))
-    line_bot_api.push_message(event.source.user_id,TextSendMessage(followMsg))
-    line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc'))) 
-    getUserLineInfo.get_save_userInfo(event.source.user_id,channel_access_token);
-    
-    
+    line_bot_api.reply_message(event.reply_token,getFollowMsg())
+
+    #line_bot_api.push_message(event.source.user_id,TextSendMessage(followMsg))
+    #line_bot_api.push_message(event.source.user_id,TextSendMessage(config.get('followMsg','instruc'))) 
+    #getUserLineInfo.get_save_userInfo(event.source.user_id,channel_access_token);    
     #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
-    #followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')
-    #print(type(config.get('msgWords','follow_msg')))
-    #line_bot_api.reply_message(event.reply_token,TextSendMessage(followMsg));
-    #StickerSendMessage(package_id=1, sticker_id=2)    
+    #followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')   
 
-@handler.add(MessageEvent ,message=[TextMessage,ImageMessage])#||ImageMessage
+@handler.add(MessageEvent ,message=[TextMessage,ImageMessage])
 def echo(event):
     if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
         #print(event.message)
@@ -127,12 +105,6 @@ def echo(event):
                 fd.write(data)
             """
 
-            #Failed. Use line api to retreive message_content. 
-            '''
-            message_content = line_bot_api.get_message_content(event.message.id)
-            with open('test.png', 'wb+') as fd:
-                        fd.write(message_content)
-            '''                
         else:
             if event.message.text=="撥打電話":
                 '''call function to get pharmacy number'''
@@ -142,43 +114,28 @@ def echo(event):
                 line_bot_api.reply_message(event.reply_token,TextSendMessage(replyMsg))
             elif event.message.text=="用藥問題":
                 '''call function to get pharmacy number'''
-                pharmNumber='\n0900-000-000'
-                replyMsg=config.get('msg_contents','mediQuestion_instruc')+pharmNumber 
-                line_bot_api.reply_message(event.reply_token,TextSendMessage(replyMsg))
+                line_bot_api.reply_message(event.reply_token,mediQuestions())
             
-            elif event.message.text=="藥局資訊":
-                content=pharInfoContent.returnPharmInfo()
-                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
-                line_bot_api.reply_message(event.reply_token,replyMsg)
+            elif (event.message.text=="藥局資訊"):
+                line_bot_api.reply_message(event.reply_token,setAndGetPharmacyFlex())
             elif event.message.text=="領藥日查詢":
-                content=mediToGrabContent.replyDateSearch()
-                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
-                line_bot_api.reply_message(event.reply_token,replyMsg)
+                #content=mediToGrabContent.replyDateSearch()
+                #replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
+                line_bot_api.reply_message(event.reply_token,replyDateSearch(event.source.user_id))
+            elif event.message.text=="其他功能":
+                line_bot_api.reply_message(event.reply_token,sendOtherFuncMsg())
             elif event.message.text=="立即前往":
                 '''get fb url'''
                 fb_url='https://www.facebook.com/'
                 requests.get(fb_url).content
-            elif event.message.text=="藥局官方帳號":
-                content=sendLineAccount.sendLineAccount()
-                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
-                line_bot_api.reply_message(event.reply_token,replyMsg)
-            else:    
-                pretty_note = '♫♪♬'
-                #print(event.message)
-                #texttype=type(event.message.text)
-                #print(type(event.message.text))
-                pretty_note+=(event.message.text)
-                replyMsg=TextSendMessage(text='您輸入了： '+pretty_note)
-                line_bot_api.reply_message(event.reply_token, replyMsg) 
-            '''
-            if event.message.text=="flexBubble":
-                content=flexMsgTest.returnBubble()
-                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
-                line_bot_api.reply_message(event.reply_token,replyMsg)
-            elif event.message.text=="flexCarousel":
-                content=flexMsgTest.returnCarousel()
-                replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
-                line_bot_api.reply_message(event.reply_token,replyMsg)    
+            elif event.message.text=="有問題，聯絡藥局":
+                line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+            elif event.message.text=="跳過教學":
+                line_bot_api.reply_message(event.reply_token,replyNotNeedInstruc())
+            elif event.message.text=="好的！顯示使用說明":
+                line_bot_api.reply_message(event.reply_token,replyNeedInstruc())
+            
+            '''     
             else:    
                 pretty_note = '♫♪♬'
                 
@@ -189,7 +146,31 @@ def echo(event):
                 pretty_note+=(event.message.text)
                 replyMsg=TextSendMessage(text=pretty_note)
                 line_bot_api.reply_message(event.reply_token, replyMsg)
-                line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))'''
+                line_bot_api.push_message(event.source.user_id, TextSendMessage(text='Hello World!'))
+            '''
+            if event.message.text=="資料已填":
+                line_bot_api.reply_message(event.reply_token,sendInstrucMsg())
+            if event.message.text=="test":
+                msg=sendMediRemind('樂森藥局', '@tsx6095n', 'eeeeee', '11', 'female', '2020-06-12', '2020-06-21')
+                line_bot_api.reply_message(event.reply_token,msg)
+
+@handler.add(PostbackEvent)
+def postbackReply(event):
+    if event.postback.data=="enterPersonInfo":
+        line_bot_api.reply_message(event.reply_token,askForPersonInfo())
+    elif event.postback.data=="recordQuestion=服藥方式":
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+    elif event.postback.data=="recordQuestion=藥物副作用":
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+    elif event.postback.data=="recordQuestion=藥物交互作用":
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+    elif event.postback.data=="recordQuestion=藥物保存方式":
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg())    
+    elif event.postback.data=="recordQuestion=其他問題":
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+    elif re.search("^patientId=",event.postback.data):
+        line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(event.postback.data))
+
 
 if __name__=="__main__":
     #app.debug=True
