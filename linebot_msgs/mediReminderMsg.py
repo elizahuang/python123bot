@@ -83,25 +83,25 @@ def sendMediRemind():
         data=dict(request.form)
         print(data)
         flex=deepcopy(mediRemindFlex)
-        '''
-        pharName=
-        patientName=
-        gender=
+        
+        pharName=data['pharmName']
+        patientName=data['patientName']
+        gender=data['gender']
         if gender=='male':
             title='先生'
         else:
             title='小姐'
-        pickDate1=
-        pickDate2=
-        patientId=
-        user_lineid=
-        pharmLineId=     
+        pickDate1=data['pickdate1']
+        pickDate2=data['pickdate2']
+        patientId=data['patientId']
+        user_lineid=data['user_lineid']
+        pharmLineId=data['pharmLineId'] 
         
         flex["body"]["contents"][0]["text"]=pharName+"提醒您：\n"+patientName+title+"您的慢箋領藥時間快到了！\n請於"+pickDate1+"~"+pickDate2+"，攜帶健保卡，前來領取慢箋藥品！"
         flex["footer"]["contents"][0]["action"]["data"]="patientId={id}".format(id=patientId)
         flex["footer"]["contents"][1]["action"]["uri"]='https://line.me/R/ti/p/{LINE_id}'.format(LINE_id=pharmLineId)
         flex["footer"]["contents"][1]["action"]["uri"]=urllib.parse.urljoin('https://line.me/R/ti/p/', pharmLineId)
-        '''
+        
         status_code = Response(status=200)
         flex["hero"]["url"]=getContents.getPicUrl('pick_medi_reminder_url')
         line_bot_api.push_message('U36ae4132a3e2709192e0b635596435b3',FlexSendMessage(alt_text='慢箋領藥時間提醒',contents=flex))
