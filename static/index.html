@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta>
+    <title>Sign Up Table</title>
+</head>
+<style type="text/css">
+    .table {
+        margin-top: 10%;
+        margin-left: 10%;
+        margin-right: 10%;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 50px;
+    }
+    div{
+        vertical-align: middle;
+        text-align: center;
+        font-size: 50px;
+    }
+    form {
+        line-height: 2em;
+    }
+
+    form>div {
+        padding: 5px 10px;
+        border: 1px solid #888888;
+        border-radius: 5px;
+    }
+
+    .ok {
+        color: #008800;
+    }
+
+    input:valid+.ok {
+        display: inline;
+    }
+
+    input:invalid+.ok {
+        display: none;
+    }
+
+    input{
+        height: 60px;
+        font-size: 50px;
+        padding: 5px 10px;
+        border: 1px solid #888888;
+        border-radius: 25px;
+    }
+
+</style>
+
+<body>
+    <div class='table'>
+        <div>Line</div>
+        <svg src="dry-clean.svg" >photo</svg>
+        <div>亮亮藥局</div>
+        <form onsubmit="alert('表單送出');">
+            <div class="flex">
+                <div>身分證字號 : </div>
+                <input type="text" required placeholder="輸入訊息" pattern="^[A-Z][0-9]{9}$" />
+                <span class="ok">ok</span><br />
+            </div>
+
+            <div class="flex">
+                <div>健保卡卡號後四碼 : </div>
+                <input type="text" required placeholder="輸入訊息" pattern="[0-9a-zA-Z]{4}" />
+                <span class="ok">ok</span><br />
+            </div>
+
+            <div class="flex">
+                <div>手機號碼 : </div>
+                <input type="text" required placeholder="輸入訊息" pattern="[0-9]{10}" />
+                <span class="ok">ok</span><br />
+            </div>
+
+            <div>
+                <input type="submit" value="送出資料" />
+            </div>
+
+        </form>
+    </div>
+</body>
+
+</html>

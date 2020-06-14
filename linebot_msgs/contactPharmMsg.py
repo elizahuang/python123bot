@@ -274,11 +274,18 @@ contactPharmFlexWithUndo={
 def sendcontactPharmWithUndo(jsonData):
   flex=deepcopy(contactPharmFlexWithUndo)
   path=urllib.parse.urljoin(config.get('server_urls','backend_url'),"postPh/")
-  data=requests.get(urllib.parse.urljoin(path,jsonData["pharName"])).content
+  print("pharName")
   print(jsonData)
+  search=jsonData["pharName"]#'小光藥局'
+  print(urllib.parse.urljoin(path,search))
+  data=requests.get(urllib.parse.urljoin(path,search)).content
+  data=json.loads(data)
+  data=data[0]
+  print(data)
+  
   phName=jsonData["pharName"]#data["phName"]
-  phTel='test'#data["phTel"]
-  phAdd='test'#data["phAdd"]
+  phTel=data["phTel"]
+  phAdd=data["phAdd"]
 
   flex["body"]["contents"][0]["text"]=phName
   flex["body"]["contents"][1]["contents"][0]["contents"][0]["text"]=phTel

@@ -138,7 +138,7 @@ def echo(event):
                 else:
                     line_bot_api.reply_message(event.reply_token,TextSendMessage(text='您尚未綁定藥局，請進行資料填寫。'))
             elif event.message.text=="領藥日查詢":
-                path=urllib.parse.urljoin('checkTime/','321')#event.source.user_id
+                path=urllib.parse.urljoin('checkTime/',event.source.user_id)#'321'#event.source.user_id
                 pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path)).content
                 pickMediDate=json.loads(pickMediDate)
                 print('test0')
@@ -231,7 +231,7 @@ def sendQuestion(type,user_lineid):
 
 @handler.add(PostbackEvent)
 def postbackReply(event):
-    user_lineid='123o'
+    user_lineid=event.source.user_id #'123o'
     if event.postback.data=="enterPersonInfo":
             line_bot_api.reply_message(event.reply_token,askForPersonInfo())
     elif event.postback.data=="recordQuestion=服藥方式":
@@ -256,6 +256,7 @@ def postbackReply(event):
         print(received_data)
         if(received_data["type"]=='confirmPickMed'):
             line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(received_data["data"]))
+            print('test')
             url=urllib.parse.urljoin(backendUrl,'/notify/')
             #print(requests.get(urllib.parse.urljoin(url,received_data["data"]["postNumber"])))
             print(requests.get(urllib.parse.urljoin(url,"1"))) #???

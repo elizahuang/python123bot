@@ -5,7 +5,7 @@ from models import mediapp_patient, mediapp_userinfo, post, mediapp_problems
 import datetime
 
 
-@app.route('/')
+@app.route('/test')
 def index():
 
     sql_cmd = """
@@ -256,7 +256,7 @@ def checkMul(lineID):
         
 
     return jsonify(data), 200
-
+'''
 @app.route('/notify/<postID>',methods=['GET'])
 def notify(postID):
     sql_cmd = """
@@ -281,6 +281,25 @@ def problem():
     else:
         problemAns = mediapp_problems(Type=Type,LineID=LineID)
         db.session.add(problemAns)
+        db.session.commit()
+
+    return 'ok', 200
+'''
+@app.route('/notify/<postID>',methods=['GET'])
+def notify(postID):
+    # sql_cmd = """
+    #     update post
+    #     set RemindStatus = 2
+    #     where id = {id}""".format(id=postID)
+    
+    # db.engine.execute(sql_cmd)
+
+    query = post.query.filter_by(id=postID).first()
+
+    if query is None:
+        return 'Not Found', 400
+    else:
+        query.RemindStatus = 2
         db.session.commit()
 
     return 'ok', 200
