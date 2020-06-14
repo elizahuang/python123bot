@@ -2,7 +2,7 @@ from flask import Flask, request, abort
 from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent,PostbackEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
-import configparser, json, codecs, emoji, requests, os,re
+import configparser, json, codecs, emoji, requests, os,re,math
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from pathlib import Path
@@ -17,7 +17,7 @@ from linebot_msgs.contactPharmMsg import *
 from linebot_msgs.mediToGrabMsg import *
 from linebot_msgs.mediReminderMsg import mediReminderMsg
 from linebot_msgs.mediReminderMsg import *
-from settings import line_bot_api,handler, headers
+from settings import line_bot_api,handler, headers, backendUrl
 
 
 app=Flask(__name__)
@@ -25,6 +25,13 @@ app.register_blueprint(urls) #urls of the projects were in urls.py
 app.register_blueprint(mediReminderMsg)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
+
+
+db = SQLAlchemy(app)
+db.init_app(app)
+###db
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://b82f545f02c5ab:39ec4e6f@us-cdbr-east-05.cleardb.net/heroku_fac4d5e662f3db1"
 
 '''Initialize channel access token and channel secret
 is_heroku=os.environ.get("IS_HEROKU",None)
@@ -51,7 +58,7 @@ def callback():
     #get request body as text
     body=request.get_data(as_text=True)  
     app.logger.info("Request body: "+body)
-    #print(request)
+    print(request)
     #print(request.headers)
     print(body)
     #line_bot_api.broadcast(TextSendMessage(text='broadcast_test'),True)
@@ -79,6 +86,7 @@ def follow(event):
     #getUserLineInfo.get_save_userInfo(event.source.user_id,channel_access_token);    
     #line_bot_api.broadcast(SendMessage(text='broadcast_test'),True)
     #followMsg=config.get('followMsg','greeting_msg')+ emoji.emojize(":grinning_face_with_big_eyes:")+"\n"+config.get('followMsg','instruc')   
+
 
 @handler.add(MessageEvent ,message=[TextMessage,ImageMessage])
 def echo(event):
@@ -117,11 +125,65 @@ def echo(event):
                 line_bot_api.reply_message(event.reply_token,mediQuestions())
             
             elif (event.message.text=="藥局資訊"):
-                line_bot_api.reply_message(event.reply_token,setAndGetPharmacyFlex())
+                path=urllib.parse.urljoin('phInfo/','123o')#event.source.user_id
+                phInfo=requests.get(urllib.parse.urljoin(backendUrl,path)).content
+                #print(phInfo)
+                phInfo=json.loads(phInfo)
+                print((phInfo))
+                print(len(phInfo))
+                print(len(phInfo))
+                print(len(phInfo))
+                if (len(phInfo)!=0):
+                    line_bot_api.reply_message(event.reply_token,setAndGetPharmacyFlex(phInfo))
+                else:
+                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text='您尚未綁定藥局，請進行資料填寫。'))
             elif event.message.text=="領藥日查詢":
+                path=urllib.parse.urljoin('checkTime/','321')#event.source.user_id
+                pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path)).content
+                pickMediDate=json.loads(pickMediDate)
+                print('test0')
+                if (len(pickMediDate)!=0):
+                    pickMediDate=replyDateSearch(pickMediDate)
+                    #print('test1')
+                    #print(len(pickMediDate))
+                    msgLen=math.floor(len(pickMediDate)/5)+1
+                    if(len(pickMediDate)/5>math.floor(len(pickMediDate)/5)):
+                        msgLen=math.floor(len(pickMediDate)/5)+1
+                    else: 
+                        msgLen=math.floor(len(pickMediDate)/5)
+                    #print(msgLen)
+                    #print('test2')
+                    if msgLen==1:
+                        line_bot_api.reply_message(event.reply_token,pickMediDate)
+                    elif msgLen==2:
+                        sendmsg=pickMediDate[0:5]
+                        line_bot_api.reply_message(event.reply_token,sendmsg)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        line_bot_api.push_message(event.source.user_id,pickMediDate)
+                    elif msgLen==3:
+                        sendmsg=pickMediDate[0:5]
+                        line_bot_api.reply_message(event.reply_token,sendmsg)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        line_bot_api.push_message(event.source.user_id,pickMediDate)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        pickMediDate.pop(0)
+                        line_bot_api.push_message(event.source.user_id,pickMediDate)
+                else:
+                    replyMsg=replyNoNeedToPick()
+                    line_bot_api.reply_message(event.reply_token,replyMsg)
                 #content=mediToGrabContent.replyDateSearch()
-                #replyMsg=FlexSendMessage(alt_text="flex test failed.",contents =content)
-                line_bot_api.reply_message(event.reply_token,replyDateSearch(event.source.user_id))
+                
             elif event.message.text=="其他功能":
                 line_bot_api.reply_message(event.reply_token,sendOtherFuncMsg())
             elif event.message.text=="立即前往":
@@ -150,26 +212,63 @@ def echo(event):
             '''
             if event.message.text=="資料已填":
                 line_bot_api.reply_message(event.reply_token,sendInstrucMsg())
-            if event.message.text=="test":
-                msg=sendMediRemind('樂森藥局', '@tsx6095n', 'eeeeee', '11', 'female', '2020-06-12', '2020-06-21')
-                line_bot_api.reply_message(event.reply_token,msg)
+            #if event.message.text=="test":
+                #msg=sendMediRemind('樂森藥局', '@tsx6095n', 'eeeeee', '11', 'female', '2020-06-12', '2020-06-21')
+                #line_bot_api.reply_message(event.reply_token,TextSendMessage(text='testReply',quick_reply=QuickReply(contents=testReply)))
+
+       
+def sendQuestion(type,user_lineid):
+    questionObj={
+        "Type": 1,
+        "LineID": ""
+    }
+    dataObj=deepcopy(questionObj)
+    dataObj["Type"]=type
+    dataObj["LineID"]=user_lineid
+    path=urllib.parse.urljoin(backendUrl,'problem/')
+    requests.post(path,data=dataObj)   
+
 
 @handler.add(PostbackEvent)
 def postbackReply(event):
+    user_lineid='123o'
     if event.postback.data=="enterPersonInfo":
-        line_bot_api.reply_message(event.reply_token,askForPersonInfo())
+            line_bot_api.reply_message(event.reply_token,askForPersonInfo())
     elif event.postback.data=="recordQuestion=服藥方式":
-        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+        sendQuestion(1, user_lineid)
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
     elif event.postback.data=="recordQuestion=藥物副作用":
-        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+        sendQuestion(2, user_lineid)
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
     elif event.postback.data=="recordQuestion=藥物交互作用":
-        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+        sendQuestion(3, user_lineid)
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
     elif event.postback.data=="recordQuestion=藥物保存方式":
-        line_bot_api.reply_message(event.reply_token,contactPharmMsg())    
+        sendQuestion(4, user_lineid)
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))    
     elif event.postback.data=="recordQuestion=其他問題":
-        line_bot_api.reply_message(event.reply_token,contactPharmMsg())
+        sendQuestion(5, user_lineid)
+        line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
     elif re.search("^patientId=",event.postback.data):
         line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(event.postback.data))
+    if isinstance(json.loads(event.postback.data),dict):
+        received_data=json.loads(event.postback.data)
+        print(received_data)
+        if(received_data["type"]=='confirmPickMed'):
+            line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(received_data["data"]))
+            url=urllib.parse.urljoin(backendUrl,'/notify/')
+            #print(requests.get(urllib.parse.urljoin(url,received_data["data"]["postNumber"])))
+            print(requests.get(urllib.parse.urljoin(url,"1"))) #???
+            print('confirm pick med achieved.')
+        elif(received_data["type"]=="ask_when_send_reminder"):
+            line_bot_api.reply_message(event.reply_token,sendcontactPharmWithUndo(received_data["data"]))
+        elif(received_data["type"]=="resendReminderFlex"):
+            requests.post(urllib.parse.urljoin(getContents.getServerUrl(),"sendReminder"),data=received_data["data"])
+    
+    #print(event.postback.data)
+        
+
+   
 
 
 if __name__=="__main__":
@@ -177,5 +276,7 @@ if __name__=="__main__":
     port=int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0',port=port)
     app.run()
+
+import views
 
 

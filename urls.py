@@ -1,6 +1,9 @@
 from flask import Blueprint, send_file
 import os
 
+
+
+
 urls= Blueprint('urls', __name__)
 
 @urls.route('/sys_img/<pic_path>',methods=['GET','POST'])

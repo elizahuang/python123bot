@@ -34,4 +34,4 @@ def sendOtherFuncMsg():
     flex=deepcopy(otherFuncFlex)
     flex["hero"]["url"]=getContents.getPicUrl('other_func_pic_url')
     #flex["footer"]["contents"][0]["uri"]=
-    return FlexSendMessage(alt_text="flex send failed.", contents=flex)
+    return FlexSendMessage(alt_text="其他功能", contents=flex)

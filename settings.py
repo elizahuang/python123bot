@@ -2,6 +2,11 @@ from linebot import(LineBotApi, WebhookHandler)
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from getContents import getTextContents
+
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify
+
 
 '''Initialize channel access token and channel secret'''
 is_heroku=os.environ.get("IS_HEROKU",None)
@@ -18,3 +23,5 @@ else:
 line_bot_api=LineBotApi(channel_access_token)
 handler=WebhookHandler(channel_secret)
 headers = {'Authorization' : 'Bearer {botToken}'.format(botToken=channel_access_token)}
+backendUrl=getTextContents('server_urls','backend_url')
+

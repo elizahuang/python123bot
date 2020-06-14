@@ -256,19 +256,25 @@ pharmacyInfoFlex={
   ]
 }
 
-def setAndGetPharmacyFlex():
+def setAndGetPharmacyFlex(phInfo):
     # get phgarmacy info from db
+    phInfoList=[]
+    for info in phInfo:
+      phInfoList.append(setSinglePharmFlex(info))
+    return phInfoList
+def setSinglePharmFlex(singleInfo):  
     flex=deepcopy(pharmacyInfoFlex)
     pharmPicUrl=getPicUrl('pharminfo_pic_url')
     pharmFBPicUrl=getPicUrl('fbinfo_pic_url')
     pharmLinePicUrl=getPicUrl('lineinfo_pic_url')
     #pharmFBUrl=None
-    pharmFBUrl="https://www.facebook.com"
-    pharmName="樂森藥局"
-    pharmNumber="06-2600000"
-    pharmAddress="台南市東區123巷123號"
-    pharmLineId='@tsx6095n'
-
+    
+    pharmFBUrl='https://'#singleInfo['WebURL']
+    pharmName=singleInfo['phName']
+    pharmNumber=singleInfo['phTel']
+    pharmAddress=singleInfo['phAdd']
+    pharmLineId=singleInfo['LineID']
+    
     flex["contents"][0]["hero"]["url"]=pharmPicUrl
     flex["contents"][0]["body"]["contents"][0]["text"]=pharmName
     flex["contents"][0]["body"]["contents"][1]["contents"][0]["text"]="電話："+pharmNumber
@@ -296,4 +302,4 @@ def setAndGetPharmacyFlex():
         print(os.path.join('https://line.me/R/ti/p/',pharmLineId))
         flex["contents"][1]["footer"]["action"]["uri"]='https://line.me/R/ti/p/{LINE_id}'.format(LINE_id=pharmLineId)
 
-    return FlexSendMessage(alt_text='Flex send failed',contents=flex) 
+    return FlexSendMessage(alt_text='藥局聯繫資訊',contents=flex) 

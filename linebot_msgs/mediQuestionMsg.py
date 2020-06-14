@@ -113,5 +113,5 @@ mediQuestionflex={
 }
 
 def mediQuestions():
-    return FlexSendMessage(alt_text="flex send failed.", contents=mediQuestionflex)
+    return FlexSendMessage(alt_text="選擇問題類型", contents=mediQuestionflex)
 

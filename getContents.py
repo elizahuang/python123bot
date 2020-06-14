@@ -6,6 +6,13 @@ import json
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 
+def getServerUrl():
+    is_heroku=os.environ.get("IS_HEROKU",None)
+    if is_heroku:
+        return config.get('server_urls','heroku_server_path')
+    else:
+        return config.get('server_urls','local_server_path')
+        
 def getPicUrl(picPath):
     is_heroku=os.environ.get("IS_HEROKU",None)
     if is_heroku:
@@ -36,3 +43,21 @@ def get_userInfo(current_user_id,channel_access_token):
     #print(userLanguage)
     #print('save the above contents into database')
     '''save the above contents into database'''
+
+def getWeekDay(intDay):
+    weekday=""
+    if(intDay==1 or intDay=='1'):
+        weekday="（一）"
+    elif(intDay==2 or intDay=='2'):
+        weekday="（二）"
+    elif(intDay==3 or intDay=='3'):
+        weekday="（三）"
+    elif(intDay==4 or intDay=='4'):
+        weekday="（四）"
+    elif(intDay==5 or intDay=='5'):
+        weekday="（五）"
+    elif(intDay==6 or intDay=='6'):
+        weekday="（六）"
+    elif(intDay==0 or intDay=='0' or intDay==7 or intDay=='7'):
+        weekday="（日）"
+    return weekday
