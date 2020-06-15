@@ -26,12 +26,12 @@ app.register_blueprint(mediReminderMsg)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://b82f545f02c5ab:39ec4e6f@us-cdbr-east-05.cleardb.net/heroku_fac4d5e662f3db1"
 
 db = SQLAlchemy(app)
 db.init_app(app)
 ###db
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://b82f545f02c5ab:39ec4e6f@us-cdbr-east-05.cleardb.net/heroku_fac4d5e662f3db1"
 
 '''Initialize channel access token and channel secret
 is_heroku=os.environ.get("IS_HEROKU",None)
@@ -269,15 +269,15 @@ def postbackReply(event):
     #print(event.postback.data)
         
 
-   
 
+from views import *
 
 if __name__=="__main__":
     #app.debug=True
     port=int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0',port=port)
-    app.run()
+    
 
-import views
+#import views
 
 
