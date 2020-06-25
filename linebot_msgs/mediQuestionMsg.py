@@ -7,7 +7,7 @@ mediQuestionflex={
   "contents": [
     {
       "type": "bubble",
-      "size": "micro",
+      "size": "kilo",
       "hero": {
         "type": "image",
         "url": "https://ae759c2c0c49.ngrok.io/sys_img/oftenAskedQuestion.png",
@@ -64,7 +64,7 @@ mediQuestionflex={
     },
     {
       "type": "bubble",
-      "size": "micro",
+      "size": "kilo",
       "hero": {
         "type": "image",
         "url": "https://ae759c2c0c49.ngrok.io/sys_img/oftenAskedQuestion.png",
@@ -113,5 +113,7 @@ mediQuestionflex={
 }
 
 def mediQuestions():
+    mediQuestionflex["contents"][0]["hero"]["url"]=getContents.getPicUrl('mediQuestion_pic_url')
+    mediQuestionflex["contents"][1]["hero"]["url"]=getContents.getPicUrl('mediQuestion_pic_url')
     return FlexSendMessage(alt_text="選擇問題類型", contents=mediQuestionflex)
 

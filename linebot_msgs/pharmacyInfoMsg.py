@@ -8,7 +8,7 @@ pharmacyInfoFlex={
   "contents": [
     {
       "type": "bubble",
-      "size": "micro",
+      "size": "kilo",
       "hero": {
         "type": "image",
         "url": "https://ae759c2c0c49.ngrok.io/sys_img/pharmInfo.png",
@@ -53,7 +53,6 @@ pharmacyInfoFlex={
                   {
                     "type": "text",
                     "text": "地址：",
-                    "wrap": True,
                     "color": "#8c8c8c",
                     "size": "xs",
                     "flex": 5
@@ -75,7 +74,7 @@ pharmacyInfoFlex={
             "size": "lg",
             "url": "https://ae759c2c0c49.ngrok.io/sys_img/phoneIcon.png",
             "position": "relative",
-            "offsetStart": "22px",
+            "offsetStart": "65px",
             "offsetTop": "3px"
           },
           {
@@ -103,7 +102,7 @@ pharmacyInfoFlex={
     },
     {
       "type": "bubble",
-      "size": "micro",
+      "size": "kilo",
       "hero": {
         "type": "image",
         "url": "https://ae759c2c0c49.ngrok.io/sys_img/lineInfo.png",
@@ -148,8 +147,8 @@ pharmacyInfoFlex={
             "type": "icon",
             "size": "lg",
             "position": "relative",
-            "offsetTop": "6px",
-            "offsetStart": "25px",
+            "offsetTop": "3px",
+            "offsetStart": "64px",
             "url": "https://ae759c2c0c49.ngrok.io/sys_img/lineIcon.png"
           },
           {
@@ -177,7 +176,7 @@ pharmacyInfoFlex={
     },
     {
       "type": "bubble",
-      "size": "micro",
+      "size": "kilo",
       "hero": {
         "type": "image",
         "url": "https://ae759c2c0c49.ngrok.io/sys_img/fbInfo.png",
@@ -226,8 +225,8 @@ pharmacyInfoFlex={
             "type": "icon",
             "size": "lg",
             "position": "relative",
-            "offsetTop": "4px",
-            "offsetStart": "25px",
+            "offsetTop": "3px",
+            "offsetStart": "72px",
             "url": "https://ae759c2c0c49.ngrok.io/sys_img/linkIcon.png"
           },
           {
@@ -259,17 +258,19 @@ pharmacyInfoFlex={
 def setAndGetPharmacyFlex(phInfo):
     # get phgarmacy info from db
     phInfoList=[]
+    showList=[]
     for info in phInfo:
-      phInfoList.append(setSinglePharmFlex(info))
+      if (not(info["phName"] in showList)):
+        showList.append(info["phName"])
+        phInfoList.append(setSinglePharmFlex(info))
     return phInfoList
 def setSinglePharmFlex(singleInfo):  
     flex=deepcopy(pharmacyInfoFlex)
     pharmPicUrl=getPicUrl('pharminfo_pic_url')
-    pharmFBPicUrl=getPicUrl('fbinfo_pic_url')
-    pharmLinePicUrl=getPicUrl('lineinfo_pic_url')
-    #pharmFBUrl=None
+    pharmFBPicUrl=getPicUrl('pharminfo_pic_url')
+    pharmLinePicUrl=getPicUrl('pharminfo_pic_url')
     
-    pharmFBUrl='https://'#singleInfo['WebURL']
+    pharmFBUrl=singleInfo["WebURL"]
     pharmName=singleInfo['phName']
     pharmNumber=singleInfo['phTel']
     pharmAddress=singleInfo['phAdd']
@@ -278,7 +279,7 @@ def setSinglePharmFlex(singleInfo):
     flex["contents"][0]["hero"]["url"]=pharmPicUrl
     flex["contents"][0]["body"]["contents"][0]["text"]=pharmName
     flex["contents"][0]["body"]["contents"][1]["contents"][0]["text"]="電話："+pharmNumber
-    flex["contents"][0]["body"]["contents"][2]["contents"][0]["text"]="地址："+pharmAddress
+    flex["contents"][0]["body"]["contents"][2]["contents"][0]["contents"][0]["text"]="地址："+pharmAddress
     flex["contents"][0]["footer"]["contents"][0]["url"]=getPicUrl('phone_icon_url')
     flex["contents"][0]["footer"]["action"]["text"]="請撥打 藥局名稱： "+pharmNumber
 
@@ -290,7 +291,7 @@ def setSinglePharmFlex(singleInfo):
         flex["contents"][2]["body"]["contents"][1]["contents"][0]["url"]=getPicUrl('search_icon_url')
         flex["contents"][2]["body"]["contents"][1]["contents"][1]["text"]=pharmName
         flex["contents"][2]["footer"]["contents"][0]["url"]=getPicUrl('link_icon_url')
-        flex["contents"][2]["footer"]["action"]["url"]=pharmFBUrl
+        flex["contents"][2]["footer"]["action"]["uri"]=pharmFBUrl
     
     if(pharmLineId==None):
         del flex["contents"][1]
@@ -299,7 +300,6 @@ def setSinglePharmFlex(singleInfo):
         flex["contents"][1]["body"]["contents"][0]["text"]=pharmName+"Line客服"
         flex["contents"][1]["body"]["contents"][1]["contents"][0]["text"]="ID: "+pharmLineId
         flex["contents"][1]["footer"]["contents"][0]["url"]=getPicUrl('line_icon_url')
-        print(os.path.join('https://line.me/R/ti/p/',pharmLineId))
         flex["contents"][1]["footer"]["action"]["uri"]='https://line.me/R/ti/p/{LINE_id}'.format(LINE_id=pharmLineId)
 
     return FlexSendMessage(alt_text='藥局聯繫資訊',contents=flex) 

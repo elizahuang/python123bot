@@ -1,7 +1,7 @@
 import os,urllib.parse,requests,json
 from linebot.models import FlexSendMessage,TextSendMessage
 from getContents import getPicUrl,getTextContents,config
-from settings import backendUrl
+from settings import backendUrl,headers_to_db
 from copy import deepcopy
 
 contactPharmFlex={
@@ -116,13 +116,18 @@ contactPharmFlex={
 #send pharmacy info without undo button
 def contactPharmMsg(user_lineId):
       infoObjs=[]
+      showList=[]
       #user_lineId='321'
       path=urllib.parse.urljoin('phInfo/',user_lineId)
-      phInfo=requests.get(urllib.parse.urljoin(backendUrl,path)).content
+      phInfo=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).content
       phInfo=json.loads(phInfo)
       if (len(phInfo)!=0):
+        msg=TextSendMessage(text='已確認您的問題！您可以選擇以下方式聯絡藥師！')
+        infoObjs.append(msg)
         for singlePharm in phInfo:
-          infoObjs.append(singlePharmMsg(singlePharm))
+          if(not(singlePharm["phName"] in showList)): 
+            showList.append(singlePharm["phName"])
+            infoObjs.append(singlePharmMsg(singlePharm))
         return infoObjs
       else: 
         return TextSendMessage(text='很抱歉，查無藥局資訊')
@@ -134,7 +139,7 @@ def singlePharmMsg(singlePharm):
     pharmLineId=singlePharm['LineID']
 
     flex=deepcopy(contactPharmFlex)
-    flex["hero"]["url"]=getPicUrl('contactPharm_pic_url')
+    flex["hero"]["url"]=getPicUrl('pharminfoResult_pic_url')
     flex["body"]["contents"][0]["text"]=pharmName
     flex["body"]["contents"][1]["contents"][0]["contents"][0]["text"]="電話："+pharmNumber
     flex["body"]["contents"][1]["contents"][0]["contents"][1]["text"]="地址："+pharmAddress
@@ -208,22 +213,6 @@ contactPharmFlexWithUndo={
         "layout": "baseline",
         "contents": [
           {
-            "type": "text",
-            "text": "按錯了 重新發送領藥提醒",
-            "align": "center"
-          }
-        ],
-        "action": {
-          "type": "postback",
-          "label": "action",
-          "data": "resendReminderFlex"
-        }
-      },
-      {
-        "type": "box",
-        "layout": "baseline",
-        "contents": [
-          {
             "type": "icon",
             "url": "https://ae759c2c0c49.ngrok.io/sys_img/phoneIcon.png",
             "offsetStart": "68px",
@@ -265,8 +254,20 @@ contactPharmFlexWithUndo={
           "label": "action",
           "uri": "https://line.me/R/ti/p/"
         }
-      }
+      },
+      {
+        "type": "button",
+        "style": "secondary",
+        "color": "#DCE1E8",
+        "action": {
+          "type": "postback",
+          "label": "按錯了，重新發送領藥提醒",
+          "data": "resendReminderFlex"
+        },
+        "height":"sm"
+      }      
     ],
+    
     "flex": 0
   }
 }
@@ -278,7 +279,7 @@ def sendcontactPharmWithUndo(jsonData):
   print(jsonData)
   search=jsonData["pharName"]#'小光藥局'
   print(urllib.parse.urljoin(path,search))
-  data=requests.get(urllib.parse.urljoin(path,search)).content
+  data=requests.get(urllib.parse.urljoin(path,search),headers=headers_to_db).content
   data=json.loads(data)
   data=data[0]
   print(data)
@@ -286,17 +287,23 @@ def sendcontactPharmWithUndo(jsonData):
   phName=jsonData["pharName"]#data["phName"]
   phTel=data["phTel"]
   phAdd=data["phAdd"]
-
+  phLineId=data["LineID"]
+  flex["hero"]["url"]=getPicUrl('pharminfoResult_pic_url')
+  print(flex["hero"]["url"])
   flex["body"]["contents"][0]["text"]=phName
   flex["body"]["contents"][1]["contents"][0]["contents"][0]["text"]=phTel
   flex["body"]["contents"][1]["contents"][0]["contents"][1]["text"]=phAdd
   
   dataToSend={
     "type":"resendReminderFlex",
-    "data":""
+    "data":{
+      "postId":""
+    }
   }
-  dataToSend["data"]=jsonData
+  dataToSend["data"]["postId"]=jsonData["postId"]
   dataToSend=json.dumps(dataToSend)
-  flex["footer"]["contents"][0]["action"]["data"]=dataToSend
+  flex["footer"]["contents"][2]["action"]["data"]=dataToSend
+  flex["footer"]["contents"][0]["action"]["text"]="請撥打："+phTel
+  flex["footer"]["contents"][1]["action"]["uri"]=urllib.parse.urljoin('https://line.me/R/ti/p/',phLineId)
   flex["hero"]["url"]=getPicUrl('contactPharm_pic_url')
   return FlexSendMessage(alt_text='聯繫藥局詢問',contents=flex)

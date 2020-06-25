@@ -17,7 +17,8 @@ from linebot_msgs.contactPharmMsg import *
 from linebot_msgs.mediToGrabMsg import *
 from linebot_msgs.mediReminderMsg import mediReminderMsg
 from linebot_msgs.mediReminderMsg import *
-from settings import line_bot_api,handler, headers, backendUrl
+from linebot_msgs.chooseQueryMediMsg import *
+from settings import line_bot_api,handler, headers, backendUrl,db_url,channel_access_token
 
 
 app=Flask(__name__)
@@ -27,7 +28,7 @@ config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://b82f545f02c5ab:39ec4e6f@us-cdbr-east-05.cleardb.net/heroku_fac4d5e662f3db1"
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
 db = SQLAlchemy(app)
 db.init_app(app)
@@ -125,64 +126,27 @@ def echo(event):
                 line_bot_api.reply_message(event.reply_token,mediQuestions())
             
             elif (event.message.text=="藥局資訊"):
-                path=urllib.parse.urljoin('phInfo/','123o')#event.source.user_id
-                phInfo=requests.get(urllib.parse.urljoin(backendUrl,path)).content
-                #print(phInfo)
-                phInfo=json.loads(phInfo)
-                print((phInfo))
-                print(len(phInfo))
-                print(len(phInfo))
-                print(len(phInfo))
+                path=urllib.parse.urljoin('phInfo/',event.source.user_id)#'123o'
+                phInfo=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).json()
+                print(phInfo)
                 if (len(phInfo)!=0):
                     line_bot_api.reply_message(event.reply_token,setAndGetPharmacyFlex(phInfo))
                 else:
                     line_bot_api.reply_message(event.reply_token,TextSendMessage(text='您尚未綁定藥局，請進行資料填寫。'))
             elif event.message.text=="領藥日查詢":
-                path=urllib.parse.urljoin('checkTime/',event.source.user_id)#'321'#event.source.user_id
-                pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path)).content
-                pickMediDate=json.loads(pickMediDate)
-                print('test0')
+                pickMediDate=[]
+                path=urllib.parse.urljoin('checkTime/',event.source.user_id)#'321'
+                pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).json()
                 if (len(pickMediDate)!=0):
-                    pickMediDate=replyDateSearch(pickMediDate)
-                    #print('test1')
-                    #print(len(pickMediDate))
-                    msgLen=math.floor(len(pickMediDate)/5)+1
-                    if(len(pickMediDate)/5>math.floor(len(pickMediDate)/5)):
-                        msgLen=math.floor(len(pickMediDate)/5)+1
-                    else: 
-                        msgLen=math.floor(len(pickMediDate)/5)
-                    #print(msgLen)
-                    #print('test2')
-                    if msgLen==1:
-                        line_bot_api.reply_message(event.reply_token,pickMediDate)
-                    elif msgLen==2:
-                        sendmsg=pickMediDate[0:5]
-                        line_bot_api.reply_message(event.reply_token,sendmsg)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        line_bot_api.push_message(event.source.user_id,pickMediDate)
-                    elif msgLen==3:
-                        sendmsg=pickMediDate[0:5]
-                        line_bot_api.reply_message(event.reply_token,sendmsg)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        line_bot_api.push_message(event.source.user_id,pickMediDate)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        pickMediDate.pop(0)
-                        line_bot_api.push_message(event.source.user_id,pickMediDate)
+                    #pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).content
+                    #pickMediDate=json.loads(pickMediDate)
+                    #print(type(pickMediDate))
+                    print(pickMediDate)
+                    flex=getMediQueryCarousel(pickMediDate)
+                    line_bot_api.reply_message(event.reply_token,flex)                
                 else:
                     replyMsg=replyNoNeedToPick()
                     line_bot_api.reply_message(event.reply_token,replyMsg)
-                #content=mediToGrabContent.replyDateSearch()
                 
             elif event.message.text=="其他功能":
                 line_bot_api.reply_message(event.reply_token,sendOtherFuncMsg())
@@ -212,9 +176,6 @@ def echo(event):
             '''
             if event.message.text=="資料已填":
                 line_bot_api.reply_message(event.reply_token,sendInstrucMsg())
-            #if event.message.text=="test":
-                #msg=sendMediRemind('樂森藥局', '@tsx6095n', 'eeeeee', '11', 'female', '2020-06-12', '2020-06-21')
-                #line_bot_api.reply_message(event.reply_token,TextSendMessage(text='testReply',quick_reply=QuickReply(contents=testReply)))
 
        
 def sendQuestion(type,user_lineid):
@@ -226,14 +187,15 @@ def sendQuestion(type,user_lineid):
     dataObj["Type"]=type
     dataObj["LineID"]=user_lineid
     path=urllib.parse.urljoin(backendUrl,'problem/')
-    requests.post(path,data=dataObj)   
+    requests.post(path,data=dataObj,headers=headers_to_db)   
 
 
 @handler.add(PostbackEvent)
 def postbackReply(event):
     user_lineid=event.source.user_id #'123o'
+    print(event)
     if event.postback.data=="enterPersonInfo":
-            line_bot_api.reply_message(event.reply_token,askForPersonInfo())
+        line_bot_api.reply_message(event.reply_token,askForPersonInfo())
     elif event.postback.data=="recordQuestion=服藥方式":
         sendQuestion(1, user_lineid)
         line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
@@ -251,20 +213,41 @@ def postbackReply(event):
         line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
     elif re.search("^patientId=",event.postback.data):
         line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(event.postback.data))
-    if isinstance(json.loads(event.postback.data),dict):
+    elif isinstance(json.loads(event.postback.data),dict):
         received_data=json.loads(event.postback.data)
         print(received_data)
         if(received_data["type"]=='confirmPickMed'):
             line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(received_data["data"]))
             print('test')
             url=urllib.parse.urljoin(backendUrl,'/notify/')
-            #print(requests.get(urllib.parse.urljoin(url,received_data["data"]["postNumber"])))
-            print(requests.get(urllib.parse.urljoin(url,"1"))) #???
+            print(requests.get(urllib.parse.urljoin(url,received_data["data"]["postId"])))
             print('confirm pick med achieved.')
         elif(received_data["type"]=="ask_when_send_reminder"):
             line_bot_api.reply_message(event.reply_token,sendcontactPharmWithUndo(received_data["data"]))
         elif(received_data["type"]=="resendReminderFlex"):
-            requests.post(urllib.parse.urljoin(getContents.getServerUrl(),"sendReminder"),data=received_data["data"])
+            url=urllib.parse.urljoin(getContents.getServerUrl(),"sendReminder/")
+            print(received_data["data"]["postId"])
+            requests.post(urllib.parse.urljoin(url,received_data["data"]["postId"]))
+        elif(received_data["type"]=="choosePost"):
+            pickMediDate=received_data["posts"]            
+            pickMediDate=replyDateSearch(pickMediDate)
+            msgLen=math.floor(len(pickMediDate)/5)+1
+            if(len(pickMediDate)/5>math.floor(len(pickMediDate)/5)):
+                msgLen=math.floor(len(pickMediDate)/5)+1
+            else: 
+                msgLen=math.floor(len(pickMediDate)/5)
+
+            if msgLen==1:
+                line_bot_api.reply_message(event.reply_token,pickMediDate)
+            elif msgLen==2:
+                sendmsg=pickMediDate[0:5]
+                line_bot_api.reply_message(event.reply_token,sendmsg)
+                pickMediDate.pop(0)
+                pickMediDate.pop(0)
+                pickMediDate.pop(0)
+                pickMediDate.pop(0)
+                pickMediDate.pop(0)
+                line_bot_api.push_message(event.source.user_id,pickMediDate)
     
     #print(event.postback.data)
         

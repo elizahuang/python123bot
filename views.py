@@ -1,8 +1,16 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,render_template
 from app import app, db
 from models import mediapp_patient, mediapp_userinfo, post, mediapp_problems
-import datetime
+import datetime,os
+
+
+@app.route('/addUser',methods=['GET','POST'])
+def showAddUserPage():
+    #fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'static')
+    #targetPath=os.path.join(fileDir,'index.html')
+    #print(targetPath)
+    return render_template("index.html")
 
 
 @app.route('/test')
@@ -233,6 +241,7 @@ def checkMul(lineID):
                         n_days = d + delta
                         diction['dayEnd'] = n_days.strftime('%Y-%m-%d')
                         diction['weekDayEnd'] = n_days.weekday()
+                        diction['symptom']=row2.symptom
                         data.append(diction)
                         # print(data)
                     else:
@@ -240,20 +249,16 @@ def checkMul(lineID):
                         diction2['userName'] = num.Name
                         diction2['result'] = 'Not Found'
                         data.append(diction2)
-
             else:
                 diction2 = {}
                 # diction2['userName'] = num.Name
                 # diction2['result'] = 'Not Found'
-                # data.append(diction2)
-                
-
+                # data.append(diction2)              
     else:
         diction3 = {}
         # diction3['lineID'] = lineID
         # diction3['result'] = 'Not Found'
-        # data.append(diction3)
-        
+        # data.append(diction3)       
 
     return jsonify(data), 200
 '''
@@ -329,20 +334,20 @@ def postInfo(id):
     diction['postID'] = id
     query = post.query.filter_by(id=id).first()
     if query == None:
-        return 'Not Found', 200
+        return 'Post not exist', 200
     else:
         query2 = mediapp_patient.query.filter_by(id=query.PatientID_id).first()
         if query2 == None:
-            return 'Not Found', 200
+            return 'Patient not exist', 200
         else:
             diction['Gender'] = query2.Sex
             diction['Name'] = query2.Name
-            diction['lindID'] = query2.lineID
+            diction['lineID'] = query2.lineID
 
         query3 = mediapp_userinfo.query.filter_by(id=query.PharmacyID).first()
     
         if query3 == None:
-            return 'Not Found', 200
+            return 'Pharmacy null', 200
         else:
             diction['PhName'] = query3.PhName
 
@@ -353,7 +358,7 @@ def postInfo(id):
         n_days = d + delta
         diction['dayEnd'] = n_days.strftime('%Y-%m-%d')
         diction['weekDayEnd'] = n_days.weekday()
-
-    data.append(diction)
-
-    return jsonify(data),200
+        diction['symptom']=query.symptom
+        data.append(diction)
+        return jsonify(data),200
+    
