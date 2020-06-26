@@ -123,7 +123,7 @@ def echo(event):
                 replyMsg+=pharmNumber 
                 line_bot_api.reply_message(event.reply_token,TextSendMessage(replyMsg))
             elif event.message.text=="用藥問題" or event.message.text=="藥局資訊" or event.message.text=="領藥日查詢":
-                lineStatus=event.source.user_id
+                lineStatus=getlineStatus(event.source.user_id)
                 if(lineStatus=='3'):
                     line_bot_api.reply_message(event.reply_token,askForPersonInfo())
                 elif(lineStatus=='1'):
