@@ -85,7 +85,7 @@ def sendMediRemind(pharName, pharmLineId, patientName, patientId, gender, pickDa
     flex["footer"]["contents"][0]["action"]["data"]="patientId={id}".format(id=patientId)
     return FlexSendMessage(alt_text='慢箋領藥時間提醒',contents=flex)
 
-@mediReminderMsg.route('/sendReminder/<postId>',methods=['POST'])
+@mediReminderMsg.route('/sendReminder/<postId>',methods=['GET'])
 def sendMediRemind(postId):
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}

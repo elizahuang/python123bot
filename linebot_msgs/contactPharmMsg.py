@@ -259,10 +259,10 @@ contactPharmFlexWithUndo={
         "type": "button",
         "style": "secondary",
         "color": "#DCE1E8",
-          "action": {
-            "type": "uri",
-            "label": "action",
-            "uri": "http://linecorp.com/"
+        "action": {
+          "type": "postback",
+          "label": "按錯了，重新發送領藥提醒",
+          "data": "postId="
           },
         "height":"sm"
       }      
@@ -302,8 +302,12 @@ def sendcontactPharmWithUndo(jsonData):
   }
   dataToSend["data"]["postId"]=jsonData["postId"]
   dataToSend=json.dumps(dataToSend)'''
-  path=urllib.parse.urljoin('sendReminder',jsonData["postId"])
-  flex["footer"]["contents"][2]["action"]["uri"]=urllib.parse.urljoin(getServerUrl,path)
+  #print('test3')
+  #print(type(jsonData["postId"]))
+  #print(jsonData["postId"])
+  #print('test4')
+  #path=urllib.parse.urljoin('sendReminder/',jsonData["postId"])
+  flex["footer"]["contents"][2]["action"]["data"]="postId="+jsonData["postId"]
   flex["footer"]["contents"][0]["action"]["text"]="請撥打："+phTel
   flex["footer"]["contents"][1]["action"]["uri"]=urllib.parse.urljoin('https://line.me/R/ti/p/',phLineId)
   flex["hero"]["url"]=getPicUrl('contactPharm_pic_url')

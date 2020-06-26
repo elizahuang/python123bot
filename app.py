@@ -202,7 +202,11 @@ def sendQuestion(type,user_lineid):
 def postbackReply(event):
     user_lineid=event.source.user_id #'123o'
     print(event)
-    if event.postback.data=="enterPersonInfo":
+    if re.search("^postId=",event.postback.data):
+        url=urllib.parse.urljoin(getContents.getServerUrl(),"sendReminder/")
+        #print(received_data["data"]["postId"])
+        requests.get(urllib.parse.urljoin(url,event.postback.data[7:]))
+    elif event.postback.data=="enterPersonInfo":
         line_bot_api.reply_message(event.reply_token,askForPersonInfo())
     elif event.postback.data=="recordQuestion=服藥方式":
         sendQuestion(1, user_lineid)
@@ -234,11 +238,11 @@ def postbackReply(event):
             print(requests.get(urllib.parse.urljoin(url,received_data["data"]["postId"])))
             print('confirm pick med achieved.')
         elif(received_data["type"]=="ask_when_send_reminder"):
+            print('test1')
+            print(received_data)
+            print('test2')
             line_bot_api.reply_message(event.reply_token,sendcontactPharmWithUndo(received_data["data"]))
-        elif(received_data["type"]=="resendReminderFlex"):
-            url=urllib.parse.urljoin(getContents.getServerUrl(),"sendReminder/")
-            print(received_data["data"]["postId"])
-            requests.post(urllib.parse.urljoin(url,received_data["data"]["postId"]))
+
         elif(received_data["type"]=="choosePost"):
             pickMediDate=received_data["posts"]            
             pickMediDate=replyDateSearch(pickMediDate)
