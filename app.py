@@ -30,6 +30,7 @@ config.read_file(codecs.open("config.ini", "r", "utf8"))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_POOL_RECYCLE']=20
 
 db = SQLAlchemy(app)
 db.init_app(app)
