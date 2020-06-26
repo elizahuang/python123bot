@@ -1,6 +1,6 @@
 import os,urllib.parse,requests,json
 from linebot.models import FlexSendMessage,TextSendMessage
-from getContents import getPicUrl,getTextContents,config
+from getContents import getPicUrl,getTextContents,config,getServerUrl
 from settings import backendUrl,headers_to_db
 from copy import deepcopy
 
@@ -259,11 +259,11 @@ contactPharmFlexWithUndo={
         "type": "button",
         "style": "secondary",
         "color": "#DCE1E8",
-        "action": {
-          "type": "postback",
-          "label": "按錯了，重新發送領藥提醒",
-          "data": "resendReminderFlex"
-        },
+          "action": {
+            "type": "uri",
+            "label": "action",
+            "uri": "http://linecorp.com/"
+          },
         "height":"sm"
       }      
     ],
@@ -293,7 +293,7 @@ def sendcontactPharmWithUndo(jsonData):
   flex["body"]["contents"][0]["text"]=phName
   flex["body"]["contents"][1]["contents"][0]["contents"][0]["text"]=phTel
   flex["body"]["contents"][1]["contents"][0]["contents"][1]["text"]=phAdd
-  
+  ''' 
   dataToSend={
     "type":"resendReminderFlex",
     "data":{
@@ -301,8 +301,9 @@ def sendcontactPharmWithUndo(jsonData):
     }
   }
   dataToSend["data"]["postId"]=jsonData["postId"]
-  dataToSend=json.dumps(dataToSend)
-  flex["footer"]["contents"][2]["action"]["data"]=dataToSend
+  dataToSend=json.dumps(dataToSend)'''
+  path=urllib.parse.urljoin('sendReminder',jsonData["postId"])
+  flex["footer"]["contents"][2]["action"]["uri"]=urllib.parse.urljoin(getServerUrl,path)
   flex["footer"]["contents"][0]["action"]["text"]="請撥打："+phTel
   flex["footer"]["contents"][1]["action"]["uri"]=urllib.parse.urljoin('https://line.me/R/ti/p/',phLineId)
   flex["hero"]["url"]=getPicUrl('contactPharm_pic_url')
