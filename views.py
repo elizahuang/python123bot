@@ -1,8 +1,16 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, jsonify, request,render_template
+from flask import Flask, jsonify, request,render_template,send_file
 from app import app, db
 from models import mediapp_patient, mediapp_userinfo, post, mediapp_problems
 import datetime,os
+
+
+@app.route('/sys_img/<pic_path>',methods=['GET','POST'])
+def returnPic(pic_path):
+    fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'static')
+    targetPath=os.path.join(fileDir,pic_path)
+
+    return send_file(targetPath, mimetype='image/png') #, video/mp4 
 
 
 @app.route('/createUser',methods=['GET','POST'])

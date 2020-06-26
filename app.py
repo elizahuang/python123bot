@@ -6,7 +6,7 @@ import configparser, json, codecs, emoji, requests, os,re,math
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from pathlib import Path
-from urls import urls
+#from urls import urls
 from tests import flexMsgTest
 from linebot_msgs.followMsg import getFollowMsg,askForPersonInfo,returnInCheck,showCheckStatus
 from linebot_msgs.instructionMsg import *
@@ -23,7 +23,7 @@ from getContents import getlineStatus
 
 
 app=Flask(__name__)
-app.register_blueprint(urls) #urls of the projects were in urls.py
+#app.register_blueprint(urls) #urls of the projects were in urls.py
 app.register_blueprint(mediReminderMsg)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
