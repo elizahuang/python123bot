@@ -1,7 +1,9 @@
 import os, configparser,codecs,requests
 from dotenv import load_dotenv
 from pathlib import Path
-import json
+import json,urllib
+#from settings import backendUrl,headers_to_db
+#from urls import urls 
 
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
@@ -22,6 +24,16 @@ def getPicUrl(picPath):
 
 def getTextContents(group, index):
     return config.get(group,index)
+
+
+def getlineStatus(line_id):
+    dataObj={"line_id":""}
+    dataObj["line_id"]=line_id
+    headers_to_db={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
+    url=urllib.parse.urljoin(config.get('server_urls','backend_url'),'/getLineStatus')
+    result=requests.post(url,json=dataObj,headers=headers_to_db).content.decode('ASCII')
+    return result
+
     
 def get_userInfo(current_user_id,channel_access_token):
     userInfoUrl='https://api.line.me/v2/bot/profile/{userId}'.format(userId=current_user_id)

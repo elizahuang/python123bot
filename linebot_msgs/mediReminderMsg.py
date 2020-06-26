@@ -136,7 +136,7 @@ def sendMediRemind(postId):
             else:
                 title='小姐'
 
-            flex["body"]["contents"][0]["text"]=pharName+"提醒您：\n"+patientName+title+"您的  "+symptom+"  慢箋領藥時間快到了！\n請於 "+pickDate1+getContents.getWeekDay(weekday1)+"~  "+pickDate2+getContents.getWeekDay(weekday2)+"\n攜帶健保卡，前來  "+pharName+"  領取慢箋藥品！"
+            flex["body"]["contents"][0]["text"]=pharName+"提醒您：\n"+patientName+title+"您的  "+symptom+"  慢箋領藥時間快到了！\n請於 "+pickDate1+getContents.getWeekDay(weekday1)+"~ "+pickDate2+getContents.getWeekDay(weekday2)+"\n攜帶健保卡，前來  "+pharName+"  領取慢箋藥品！"
             flex["footer"]["contents"][0]["action"]["data"]=confirmData2
 
             stringFormData={

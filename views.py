@@ -5,7 +5,7 @@ from models import mediapp_patient, mediapp_userinfo, post, mediapp_problems
 import datetime,os
 
 
-@app.route('/addUser',methods=['GET','POST'])
+@app.route('/createUser',methods=['GET','POST'])
 def showAddUserPage():
     #fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'static')
     #targetPath=os.path.join(fileDir,'index.html')
@@ -27,6 +27,45 @@ def index():
     print("OK")
     return 'OK'
 
+@app.route('/getLineStatus',methods=['POST'])
+def getLineStatus():
+    print(request.get_json())
+    line_id=request.get_json()["line_id"]
+    linePatient=mediapp_patient.query.filter_by(lineID=line_id).all()
+    lineStatus=0
+    if linePatient:
+        for patient in linePatient:
+            if patient.Certified=='1':
+                lineStatus='1'
+            elif patient.Certified=='2':
+                lineStatus='2'
+                break
+    else:
+        lineStatus='3'  
+        #0 patient has no line account
+        #1 patient applied account, not certidfied
+        #2 patient line account certified
+        #3 lineid not found in db 
+    print('test\ntest\ntest\n')
+    print(lineStatus)
+    return lineStatus
+
+@app.route('/getLinePending',methods=['POST'])
+def getLinePending():
+    line_id=request.get_json()["line_id"]
+    linePatient=mediapp_patient.query.filter_by(lineID=line_id).all()
+    pendings=[]
+    if linePatient:
+        for patient in linePatient:
+            pendingInfo={}
+            if patient.Certified=='1':
+                pendingInfo["name"]=patient.Name
+            pendings.append(pendingInfo)
+        #0 patient has no line account
+        #1 patient applied account, not certidfied
+        #2 patient line account certified
+        #3 lineid not found in db 
+    return jsonify(pendings),200
 
 @app.route('/user/<lineID>',methods=['GET'])
 def users(lineID):
@@ -273,6 +312,7 @@ def notify(postID):
 
     return 'ok', 200
 
+'''
 @app.route('/problem',methods=['POST'])
 def problem():
     req_data = request.form
@@ -289,7 +329,7 @@ def problem():
         db.session.commit()
 
     return 'ok', 200
-'''
+
 @app.route('/notify/<postID>',methods=['GET'])
 def notify(postID):
     # sql_cmd = """

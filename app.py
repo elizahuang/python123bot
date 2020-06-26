@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from urls import urls
 from tests import flexMsgTest
-from linebot_msgs.followMsg import getFollowMsg,askForPersonInfo
+from linebot_msgs.followMsg import getFollowMsg,askForPersonInfo,returnInCheck,showCheckStatus
 from linebot_msgs.instructionMsg import *
 from linebot_msgs.pharmacyInfoMsg import *
 from linebot_msgs.otherFunctionsMsg import *
@@ -19,6 +19,7 @@ from linebot_msgs.mediReminderMsg import mediReminderMsg
 from linebot_msgs.mediReminderMsg import *
 from linebot_msgs.chooseQueryMediMsg import *
 from settings import line_bot_api,handler, headers, backendUrl,db_url,channel_access_token
+from getContents import getlineStatus
 
 
 app=Flask(__name__)
@@ -121,32 +122,38 @@ def echo(event):
                 replyMsg=config.get('msg_contents','dial_instruc') 
                 replyMsg+=pharmNumber 
                 line_bot_api.reply_message(event.reply_token,TextSendMessage(replyMsg))
-            elif event.message.text=="用藥問題":
-                '''call function to get pharmacy number'''
-                line_bot_api.reply_message(event.reply_token,mediQuestions())
-            
-            elif (event.message.text=="藥局資訊"):
-                path=urllib.parse.urljoin('phInfo/',event.source.user_id)#'123o'
-                phInfo=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).json()
-                print(phInfo)
-                if (len(phInfo)!=0):
-                    line_bot_api.reply_message(event.reply_token,setAndGetPharmacyFlex(phInfo))
-                else:
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text='您尚未綁定藥局，請進行資料填寫。'))
-            elif event.message.text=="領藥日查詢":
-                pickMediDate=[]
-                path=urllib.parse.urljoin('checkTime/',event.source.user_id)#'321'
-                pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).json()
-                if (len(pickMediDate)!=0):
-                    #pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).content
-                    #pickMediDate=json.loads(pickMediDate)
-                    #print(type(pickMediDate))
-                    print(pickMediDate)
-                    flex=getMediQueryCarousel(pickMediDate)
-                    line_bot_api.reply_message(event.reply_token,flex)                
-                else:
-                    replyMsg=replyNoNeedToPick()
-                    line_bot_api.reply_message(event.reply_token,replyMsg)
+            elif event.message.text=="用藥問題" or event.message.text=="藥局資訊" or event.message.text=="領藥日查詢":
+                lineStatus=event.source.user_id
+                if(lineStatus=='3'):
+                    line_bot_api.reply_message(event.reply_token,askForPersonInfo())
+                elif(lineStatus=='1'):
+                    line_bot_api.reply_message(event.reply_token,returnInCheck())
+                elif(lineStatus=='2'):                    
+                    if event.message.text=="用藥問題":
+                        '''call function to get pharmacy number'''
+                        line_bot_api.reply_message(event.reply_token,mediQuestions())
+                    elif (event.message.text=="藥局資訊"):
+                        path=urllib.parse.urljoin('phInfo/',event.source.user_id)#'123o'
+                        phInfo=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).json()
+                        print(phInfo)
+                        if (len(phInfo)!=0):
+                            line_bot_api.reply_message(event.reply_token,setAndGetPharmacyFlex(phInfo))
+                        else:
+                            line_bot_api.reply_message(event.reply_token,TextSendMessage(text='您尚未綁定藥局，請進行資料填寫。'))
+                    elif event.message.text=="領藥日查詢":
+                        pickMediDate=[]
+                        path=urllib.parse.urljoin('checkTime/',event.source.user_id)#'321'
+                        pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).json()
+                        if (len(pickMediDate)!=0):
+                            #pickMediDate=requests.get(urllib.parse.urljoin(backendUrl,path),headers=headers_to_db).content
+                            #pickMediDate=json.loads(pickMediDate)
+                            #print(type(pickMediDate))
+                            print(pickMediDate)
+                            flex=getMediQueryCarousel(pickMediDate)
+                            line_bot_api.reply_message(event.reply_token,flex)                
+                        else:
+                            replyMsg=replyNoNeedToPick()
+                            line_bot_api.reply_message(event.reply_token,replyMsg)
                 
             elif event.message.text=="其他功能":
                 line_bot_api.reply_message(event.reply_token,sendOtherFuncMsg())
@@ -186,7 +193,8 @@ def sendQuestion(type,user_lineid):
     dataObj=deepcopy(questionObj)
     dataObj["Type"]=type
     dataObj["LineID"]=user_lineid
-    path=urllib.parse.urljoin(backendUrl,'problem/')
+    path=urllib.parse.urljoin(backendUrl,'/problem')
+    print(path)
     requests.post(path,data=dataObj,headers=headers_to_db)   
 
 
@@ -213,6 +221,9 @@ def postbackReply(event):
         line_bot_api.reply_message(event.reply_token,contactPharmMsg(user_lineid))
     elif re.search("^patientId=",event.postback.data):
         line_bot_api.reply_message(event.reply_token,sendRemindConfirmMsg(event.postback.data))
+    elif event.postback.data=="checkCheckStatus":
+        line_id=event.source.user_id
+        line_bot_api.reply_message(event.reply_token,showCheckStatus(line_id))
     elif isinstance(json.loads(event.postback.data),dict):
         received_data=json.loads(event.postback.data)
         print(received_data)
