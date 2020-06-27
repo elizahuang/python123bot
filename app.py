@@ -31,10 +31,8 @@ config.read_file(codecs.open("config.ini", "r", "utf8"))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-#app.config['ENV']='development'
-#app.config['DEBUG']=True
 #app.config['SQLALCHEMY_POOL_RECYCLE']=1
-print(app.config)
+#print(app.config)
 #db = SQLAlchemy(app)
 from models import db
 db.init_app(app)
