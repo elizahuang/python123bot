@@ -1,11 +1,70 @@
-import os, configparser,codecs, requests,urllib
-from linebot.models import (TextSendMessage, ImageSendMessage, FlexSendMessage,PostbackAction,QuickReply,QuickReplyButton)
+import os, configparser,codecs, requests,urllib,json
+from linebot.models import (TextSendMessage, ImageSendMessage, FlexSendMessage,PostbackAction,QuickReply,QuickReplyButton,ImageSendMessage)
 from getContents import getPicUrl,getServerUrl
 from copy import deepcopy
-from settings import headers_to_db
+from settings import headers_to_db,line_bot_api
+from flask import Blueprint,request
 
+followMsg = Blueprint('followMsg', __name__,)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
+
+@followMsg.route('/patientConfirmed/<patient_id>',methods=['POST'])
+def sendConfirmed(patient_id):
+  url=urllib.parse.urljoin(getServerUrl(),'getPatientInfo/')
+  url=urllib.parse.urljoin(url,patient_id)
+  print('testtttt')
+  print(url)
+  print('testtttt')
+  patientInfo=requests.post(url,headers=headers_to_db).content.decode('ASCII')
+  if patientInfo=='no such patient':
+    return 'no such patient.\request failed',500
+  else:   
+    patientInfo=json.loads(patientInfo)
+    msgToSend=[]
+    flex={
+      "type": "bubble",
+      "size": "kilo",
+      "hero": {
+        "type": "image",
+        "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+        "size": "full",
+        "aspectRatio": "20:13",
+        "aspectMode": "cover"
+        },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "姓名：patientName",
+            "weight": "bold",
+            "size": "xl"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "margin": "lg",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "您的帳號已完成審核，\n歡迎使用下方選單，進行各項功能操作！",
+                "wrap": True
+              }
+            ]
+          }
+        ]
+      }
+    }
+    flex["body"]["contents"][0]["text"]="姓名："+patientInfo["name"]
+    msgToSend.append(FlexSendMessage(alt_text=('您的帳號審核已通過。\n歡迎開始使用享藥健康！'),contents=flex))
+    msgToSend.append(TextSendMessage(text=config.get('msg_contents','add_user_instruc')))
+    msgToSend.append(ImageSendMessage(original_content_url=getPicUrl('instruc_pic_url'),preview_image_url=getPicUrl('instruc_pic_url')))
+    line_bot_api.push_message(patientInfo["line_id"],msgToSend)
+    return 'Confirm msg successfully sent.',200
+
 
 quickReply_hello={
     "type": "text", 
@@ -96,6 +155,7 @@ def askForPersonInfo():
 
 checkAccountStatusMsg={
   "type": "bubble",
+  "size": "kilo",
   "hero": {
     "type": "image",
     "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
@@ -139,7 +199,7 @@ checkAccountStatusMsg={
         "height": "sm",
         "action": {
           "type": "postback",
-          "label": "查看審核狀態",
+          "label": "查看審核中帳戶",
           "data": "checkCheckStatus"
         }
       }
@@ -156,6 +216,7 @@ def returnInCheck():
 
 showPendingMsg={
   "type": "bubble",
+  "size": "kilo",
   "hero": {
     "type": "image",
     "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",

@@ -4,7 +4,7 @@ from app import app, db
 from models import mediapp_patient, mediapp_userinfo, post, mediapp_problems
 import datetime,os
 
-
+# get imgs in the project
 @app.route('/sys_img/<pic_path>',methods=['GET','POST'])
 def returnPic(pic_path):
     fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'static')
@@ -12,7 +12,7 @@ def returnPic(pic_path):
 
     return send_file(targetPath, mimetype='image/png') #, video/mp4 
 
-
+# return webpage
 @app.route('/createUser',methods=['GET','POST'])
 def showAddUserPage():
     #fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'static')
@@ -20,6 +20,7 @@ def showAddUserPage():
     #print(targetPath)
     return render_template("index.html")
 
+'''routes connect to db and fetch data'''
 
 @app.route('/test')
 def index():
@@ -35,12 +36,24 @@ def index():
     print("OK")
     return 'OK'
 
+@app.route('/getPatientInfo/<patient_id>',methods=['POST'])
+def getPatientInfo(patient_id):
+    patient=mediapp_patient.query.filter_by(id=int(patient_id)).first()
+    if patient:
+        patientInfo={}
+        patientInfo["name"]=patient.Name
+        patientInfo["line_id"]=patient.lineID
+        return jsonify(patientInfo),200
+    else:
+        return 'no such patient',500
+
+
 @app.route('/getLineStatus',methods=['POST'])
 def getLineStatus():
     print(request.get_json())
     line_id=request.get_json()["line_id"]
     linePatient=mediapp_patient.query.filter_by(lineID=line_id).all()
-    lineStatus=0
+    lineStatus='0'
     if linePatient:
         for patient in linePatient:
             if patient.Certified=='1':
@@ -57,6 +70,7 @@ def getLineStatus():
     print('test\ntest\ntest\n')
     print(lineStatus)
     return lineStatus
+
 
 @app.route('/getLinePending',methods=['POST'])
 def getLinePending():

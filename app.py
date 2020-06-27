@@ -8,14 +8,14 @@ from dotenv import load_dotenv
 from pathlib import Path
 #from urls import urls
 from tests import flexMsgTest
-from linebot_msgs.followMsg import getFollowMsg,askForPersonInfo,returnInCheck,showCheckStatus
+from linebot_msgs.followMsg import *
 from linebot_msgs.instructionMsg import *
 from linebot_msgs.pharmacyInfoMsg import *
 from linebot_msgs.otherFunctionsMsg import *
 from linebot_msgs.mediQuestionMsg import *
 from linebot_msgs.contactPharmMsg import *
 from linebot_msgs.mediToGrabMsg import *
-from linebot_msgs.mediReminderMsg import mediReminderMsg
+from linebot_msgs.mediReminderMsg import *
 from linebot_msgs.mediReminderMsg import *
 from linebot_msgs.chooseQueryMediMsg import *
 from settings import line_bot_api,handler, headers, backendUrl,db_url,channel_access_token
@@ -23,8 +23,8 @@ from getContents import getlineStatus
 
 
 app=Flask(__name__)
-#app.register_blueprint(urls) #urls of the projects were in urls.py
-app.register_blueprint(mediReminderMsg)
+app.register_blueprint(mediReminderMsg) #urls of the projects were in urls.py
+app.register_blueprint(followMsg)
 config=configparser.ConfigParser()
 config.read_file(codecs.open("config.ini", "r", "utf8"))
 
