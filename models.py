@@ -2,7 +2,7 @@
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 
-db = SQLAlchemy()
+#db = SQLAlchemy()
 
 class mediapp_patient(db.Model):
     id = db.Column(db.Integer, primary_key = True)

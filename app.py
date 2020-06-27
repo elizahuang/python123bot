@@ -33,8 +33,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 #app.config['SQLALCHEMY_POOL_RECYCLE']=1
 #print(app.config)
-#db = SQLAlchemy(app)
-from models import db
+db = SQLAlchemy(app)
+#from models import db
 db.init_app(app)
 ###db
 
