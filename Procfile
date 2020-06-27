@@ -1,1 +1,1 @@
-web: PYTHONPATH=$(pwd)waitress-serve --listen=*:5000 app:app
+web: PYTHONPATH=$(pwd)waitress-serve -port=$PORT app:app
