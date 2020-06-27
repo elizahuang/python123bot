@@ -3,7 +3,7 @@ from linebot import(LineBotApi, WebhookHandler)
 from linebot.exceptions import(InvalidSignatureError)
 from linebot.models import (MessageEvent,FollowEvent,PostbackEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage, FlexSendMessage)
 import configparser, json, codecs, emoji, requests, os,re,math
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from pathlib import Path
 from tests import flexMsgTest
@@ -33,8 +33,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 #app.config['SQLALCHEMY_POOL_RECYCLE']=1
 #print(app.config)
-db = SQLAlchemy(app)
-#from models import db
+#db = SQLAlchemy(app)
+from models import db
 db.init_app(app)
 ###db
 
