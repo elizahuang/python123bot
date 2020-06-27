@@ -1,5 +1,8 @@
-from app import db
+#from app import db
+from flask_sqlalchemy import SQLAlchemy
 import datetime
+
+db = SQLAlchemy()
 
 class mediapp_patient(db.Model):
     id = db.Column(db.Integer, primary_key = True)
