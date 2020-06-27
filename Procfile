@@ -1,1 +1,1 @@
-web: waitress-serve --listen=*:5000 app:app
+web: PYTHONPATH=$(pwd)waitress-serve --listen=*:5000 app:app
