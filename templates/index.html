@@ -15,48 +15,50 @@
         text-align: center;
         font-size: 50px;
     }
-    div{
+    
+    div {
         vertical-align: middle;
         text-align: center;
         font-size: 50px;
     }
+    
     form {
         line-height: 2em;
     }
-
+    
     form>div {
         padding: 5px 10px;
         border: 1px solid #888888;
         border-radius: 5px;
     }
-
+    
     .ok {
         color: #008800;
     }
-
+    
     input:valid+.ok {
         display: inline;
     }
-
+    
     input:invalid+.ok {
         display: none;
     }
-
-    input{
+    
+    input {
         height: 60px;
         font-size: 50px;
         padding: 5px 10px;
         border: 1px solid #888888;
         border-radius: 25px;
     }
-
 </style>
 
 <body>
     <div class='table'>
         <div>Line</div>
-        <svg src="dry-clean.svg" >photo</svg>
-        <div>亮亮藥局</div>
+        <!--svg src="dry-clean.svg" width="200" height="200">photo</svg-->
+        <img src="../static/header_pic.png" width="230" height="230">
+        <div>享藥健康</div>
         <form onsubmit="alert('表單送出');">
             <div class="flex">
                 <div>身分證字號 : </div>
@@ -65,16 +67,16 @@
             </div>
 
             <div class="flex">
-                <div>健保卡卡號後四碼 : </div>
-                <input type="text" required placeholder="輸入訊息" pattern="[0-9a-zA-Z]{4}" />
+                <div>健保卡卡號 : </div>
+                <input type="text" required placeholder="輸入訊息" pattern="[0-9a-zA-Z]{12}" />
                 <span class="ok">ok</span><br />
             </div>
 
-            <div class="flex">
+            <!--div class="flex">
                 <div>手機號碼 : </div>
                 <input type="text" required placeholder="輸入訊息" pattern="[0-9]{10}" />
                 <span class="ok">ok</span><br />
-            </div>
+            </div-->
 
             <div>
                 <input type="submit" value="送出資料" />
@@ -82,6 +84,28 @@
 
         </form>
     </div>
+    <script src="liff.js">
+        /*
+                myLiffId = "1654305761-x8E3wwA0"
+                liff
+                    .init({
+                        liffId: myLiffId
+                    })
+                    .then(() => {
+                        document.querySelector("form").action = 'https://82e7e48a54aa.ngrok.io' + '/addUser';
+                        document.querySelector("form").method = 'POST';
+                        alert('test123')
+                    })
+                    .catch((err) => {
+                        alert('test000')
+                        document.getElementById("liffAppContent").classList.add('hidden');
+                        document.getElementById("liffInitErrorMessage").classList.remove('hidden');
+                    });
+
+                document.querySelector("form").addEventListener('submit', () => {
+                    liff.closeWindow()
+                })*/
+    </script>
 </body>
 
 </html>

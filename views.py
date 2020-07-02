@@ -18,7 +18,8 @@ def showAddUserPage():
     #fileDir = os.path.join(os.path.dirname(os.path.realpath('__file__')),'static')
     #targetPath=os.path.join(fileDir,'index.html')
     #print(targetPath)
-    return render_template("index.html")
+    #return render_template("index.html")
+    return render_template("test.html")
 
 '''routes connect to db and fetch data'''
 
@@ -201,10 +202,13 @@ def phInfo(lineID):
     return jsonify(data) , 200
 
 
-@app.route('/addUser/', methods=['POST'])
+@app.route('/addUser', methods=['POST'])
 def addUser():
     # , cardNumber, lineID, photo
-
+    print('test1')
+    print(request.form)
+    print('test2')
+    print('test3')
     req_data = request.form
     cardID = req_data['cardID']
     cardNumber = req_data['cardNumber']
